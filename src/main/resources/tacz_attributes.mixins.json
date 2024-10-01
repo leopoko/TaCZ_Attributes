@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.github.leopoko.tacz_attributes.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "tacz_attributes.refmap.json",
+  "mixins": [
+    "LivingEntityReloadMixin",
+    "LivingEntityReloadAccessor"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

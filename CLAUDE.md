@@ -15,28 +15,27 @@ Minecraft Forge 1.20.1 用のMODプロジェクト。TaCZ（Timeless and Classic
 
 ## 主な依存MOD
 
-- **TaCZ** (Timeless and Classics Zero) - 銃MOD本体 (ローカルビルド、JarJar付き`-all.jar`)
+- **TaCZ** (Timeless and Classics Zero) - 銃MOD本体 (CurseMaven経由)
 - **ApothicAttributes** - 属性拡張ライブラリ
 - **Placebo** - ApothicAttributesの前提ライブラリ
 
-## TaCZ JARの更新手順
+## TaCZ依存の管理
 
-TaCZを更新する場合は、**必ずJarJar付きの`-all.jar`を使用**すること。
+TaCZはCurseMavenから取得する。CurseForgeの公開JARにはJarJar依存（LuaJ, MixinExtras,
+commons-math3, bcel）が含まれており、開発環境でもForgeのJarInJarロケーターが
+自動的に展開・ロードする。
 
-```bash
-# 1. TaCZソースディレクトリでJarJarタスクを実行
-cd /path/to/TACZ
-./gradlew jarJar
-
-# 2. 生成された-all.jarをlibsにコピー（ファイル名は-allを除く）
-cp build/libs/tacz-1.20.1-X.X.X-all.jar /path/to/TaCZ_Attributes/libs/tacz-1.20.1-X.X.X.jar
-
-# 3. Gradle deobfキャッシュを削除して再生成させる
-rm -rf ~/.gradle/caches/forge_gradle/deobf_dependencies/libs/tacz-1.20.1/
+```gradle
+// build.gradle の dependencies ブロック
+implementation fg.deobf("curse.maven:timeless-and-classics-zero-1028108:<fileId>")
 ```
 
-**重要**: 通常の`./gradlew build`で生成されるJARにはJarJar依存（LuaJ, MixinExtras,
-commons-math3, bcel）が含まれない。`-all.jar`を使わないと開発環境で
+**TaCZバージョン更新時**: CurseForgeのファイルIDを更新する。
+ファイルIDは https://www.curseforge.com/minecraft/mc-mods/timeless-and-classics-zero/files
+から確認できる。
+
+**重要**: ローカルビルドのJARを`libs/`に置く方式は使わないこと。
+ローカルJARではJarJar依存がForgeのクラスローダーに正しくロードされず、
 `ClassNotFoundException`/`NoClassDefFoundError` が発生する。
 
 ## プロジェクト構造
@@ -78,3 +77,4 @@ src/main/java/com/github/leopoko/tacz_attributes/
 - `gradle.properties` のテンプレート変数が `mods.toml` と `pack.mcmeta` に展開される
 - 開発環境でのみデバッグログを出力する（`FMLEnvironment.production` で判定）
 - ソースのエンコーディングは UTF-8
+- `build/libs/` にJARが残っていると `runClient` 等でモジュール競合（`ResolutionException`）が発生する。`build.gradle` に自動クリーンフックが設定済み

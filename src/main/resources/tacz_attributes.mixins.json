@@ -5,7 +5,10 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "tacz_attributes.refmap.json",
   "mixins": [
-    "LivingEntityReloadMixin"
+    "LivingEntityReloadMixin",
+    "LivingEntityBoltMixin",
+    "GunDataMixin",
+    "ModernKineticGunScriptAPIMixin"
   ],
   "client": [
     "ObjectAnimationRunnerMixin"

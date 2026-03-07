@@ -44,6 +44,7 @@ implementation fg.deobf("curse.maven:timeless-and-classics-zero-1028108:<fileId>
 src/main/java/com/github/leopoko/tacz_attributes/
 ├── Tacz_attributes.java          # MODメインクラス (@Mod エントリポイント)
 ├── GunDamageModifier.java        # 銃ダメージ倍率の適用 (EntityHurtByGunEvent)
+├── GunKillAmmoRecovery.java     # キル時弾薬回復の適用 (EntityKillByGunEvent)
 ├── api/
 │   └── ISpeedModifiable.java     # アニメーション速度倍率のダックインターフェース
 ├── attribute/
@@ -51,12 +52,17 @@ src/main/java/com/github/leopoko/tacz_attributes/
 │   ├── EntityAttributeSetup.java # プレイヤーへの属性バインド
 │   └── GunType.java              # 銃種enum・銃種別属性の定義
 ├── client/
-│   └── ReloadAnimationSpeedHandler.java # クライアント側リロードアニメーション速度同期
+│   └── ReloadAnimationSpeedHandler.java # クライアント側リロード/ボルトアニメーション速度同期
 ├── mixin/
+│   ├── GunDataMixin.java                # マガジン容量倍率の適用 (ShooterContext連携)
+│   ├── LivingEntityBoltMixin.java       # コッキング速度の変更 (タイムスタンプスケーリング)
 │   ├── LivingEntityReloadMixin.java     # リロード速度の変更 (タイムスタンプスケーリング)
+│   ├── ModernKineticGunScriptAPIMixin.java # 弾薬非消費・リロード時弾薬非消費・追加弾薬の適用
 │   └── ObjectAnimationRunnerMixin.java  # アニメーション速度倍率のMixin
 └── util/
-    └── GunTypeResolver.java      # gunId/ItemStack → GunType 解決ユーティリティ
+    ├── GunTypeResolver.java      # gunId/ItemStack → GunType 解決ユーティリティ
+    ├── ReloadFinishingContext.java # リロード処理中フラグ管理 (ThreadLocal)
+    └── ShooterContext.java       # ThreadLocalによるプレイヤーコンテキスト管理
 ```
 
 ## カスタム属性
@@ -67,20 +73,41 @@ src/main/java/com/github/leopoko/tacz_attributes/
 |------|-----|-----------|------|------|
 | GUN_DAMAGE | `gun_damage` | 1.0 | 0.0〜1024.0 | 全銃弾ダメージの倍率 |
 | RELOAD_SPEED | `reload_speed` | 1.0 | 0.1〜20.0 | 全銃リロード速度の倍率 |
+| BOLT_ACTION_SPEED | `bolt_action_speed` | 1.0 | 0.1〜20.0 | 全銃コッキング速度の倍率 |
+| MAGAZINE_CAPACITY | `magazine_capacity` | 1.0 | 0.1〜100.0 | 全銃マガジン容量の倍率 |
+| AMMO_SAVE_CHANCE | `ammo_save_chance` | 0.0 | 0.0〜1.0 | 射撃時弾薬を消費しない確率 |
+| AMMO_RECOVERY_CHANCE | `ammo_recovery_chance` | 0.0 | 0.0〜1.0 | キル時に弾薬が回復する確率 |
+| AMMO_RECOVERY_AMOUNT | `ammo_recovery_amount` | 0.0 | 0.0〜100.0 | キル時に回復する弾薬の固定数 |
+| AMMO_RECOVERY_PERCENT | `ammo_recovery_percent` | 0.0 | 0.0〜1.0 | キル時に回復する弾薬のマガジン容量比率 |
+| RELOAD_AMMO_SAVE_CHANCE | `reload_ammo_save_chance` | 0.0 | 0.0〜1.0 | リロード時にインベントリ弾薬を消費しない確率 |
+| BONUS_AMMO_CHANCE | `bonus_ammo_chance` | 0.0 | 0.0〜1.0 | リロード完了時に追加弾薬が装填される確率 |
+| BONUS_AMMO_AMOUNT | `bonus_ammo_amount` | 0.0 | 0.0〜100.0 | 追加装填される弾薬の固定数 |
+| BONUS_AMMO_PERCENT | `bonus_ammo_percent` | 0.0 | 0.0〜1.0 | 追加装填される弾薬のマガジン容量比率 |
 
-### 銃種別（最終倍率 = 全体 × 銃種別）
+### 銃種別
 
-| 銃種 | ダメージ属性 | リロード速度属性 |
-|------|------------|----------------|
-| PISTOL | `pistol_damage` | `pistol_reload_speed` |
-| SNIPER | `sniper_damage` | `sniper_reload_speed` |
-| RIFLE | `rifle_damage` | `rifle_reload_speed` |
-| SHOTGUN | `shotgun_damage` | `shotgun_reload_speed` |
-| SMG | `smg_damage` | `smg_reload_speed` |
-| RPG | `rpg_damage` | `rpg_reload_speed` |
-| MG | `mg_damage` | `mg_reload_speed` |
+ダメージ・リロード速度・コッキング速度・マガジン容量は乗算合成（最終倍率 = 全体 × 銃種別）。
+確率・数量系は加算合成（最終値 = min(上限, 全体 + 銃種別)）。
 
-銃種別属性のデフォルト値はすべて 1.0（変更なし）、範囲はダメージ: 0.0〜1024.0、リロード速度: 0.1〜20.0。
+各銃種（PISTOL, SNIPER, RIFLE, SHOTGUN, SMG, RPG, MG）ごとに以下の属性が存在する:
+
+| カテゴリ | 属性サフィックス | 命名例（PISTOL） |
+|---------|----------------|-----------------|
+| ダメージ | `_damage` | `pistol_damage` |
+| リロード速度 | `_reload_speed` | `pistol_reload_speed` |
+| コッキング速度 | `_bolt_action_speed` | `pistol_bolt_action_speed` |
+| マガジン容量 | `_magazine_capacity` | `pistol_magazine_capacity` |
+| 射撃時弾薬非消費確率 | `_ammo_save_chance` | `pistol_ammo_save_chance` |
+| キル時弾薬回復確率 | `_ammo_recovery_chance` | `pistol_ammo_recovery_chance` |
+| キル時弾薬回復量（固定） | `_ammo_recovery_amount` | `pistol_ammo_recovery_amount` |
+| キル時弾薬回復量（割合） | `_ammo_recovery_percent` | `pistol_ammo_recovery_percent` |
+| リロード時弾薬非消費確率 | `_reload_ammo_save_chance` | `pistol_reload_ammo_save_chance` |
+| リロード時追加弾薬確率 | `_bonus_ammo_chance` | `pistol_bonus_ammo_chance` |
+| リロード時追加弾薬量（固定） | `_bonus_ammo_amount` | `pistol_bonus_ammo_amount` |
+| リロード時追加弾薬量（割合） | `_bonus_ammo_percent` | `pistol_bonus_ammo_percent` |
+
+銃種別属性のデフォルト値は倍率系がすべて 1.0（変更なし）、確率・数量系が 0.0（発動なし）。
+範囲はダメージ: 0.0〜1024.0、速度系: 0.1〜20.0、マガジン容量: 0.1〜100.0、確率: 0.0〜1.0、数量: 0.0〜100.0。
 銃種は TaCZ の `GunTabType` に準拠し、`GunType` enum で管理される。
 
 ## MOD ID

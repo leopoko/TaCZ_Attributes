@@ -16,6 +16,7 @@ import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.client.resource.GunDisplayInstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
@@ -28,15 +29,13 @@ import org.apache.logging.log4j.Logger;
 import java.util.List;
 
 /**
- * クライアント側でリロードアニメーションの速度をリロード速度属性に追従させるイベントハンドラ。
+ * クライアント側でリロード/ボルトアニメーションの速度を属性に追従させるイベントハンドラ。
  * <p>
  * 毎クライアントtickで以下を行う:
- * 1. プレイヤーのリロード速度属性を取得
- * 2. リロード中であればMAIN_TRACKのアニメーションランナーに速度倍率を設定
- * 3. リロード終了時に速度倍率をリセット
- * <p>
- * デフォルトステートマシン（およびその派生）では、MAIN_TRACKは
- * STATIC_TRACK_LINE (trackLine 0) の 5番目のトラック (index 4) に配置される。
+ * 1. プレイヤーのリロード/ボルト状態を確認
+ * 2. リロード中であればリロード速度倍率、ボルト中であればコッキング速度倍率を
+ *    MAIN_TRACKのアニメーションランナーに設定
+ * 3. どちらも終了した時に速度倍率をリセット
  */
 @Mod.EventBusSubscriber(modid = Tacz_attributes.MODID, value = Dist.CLIENT)
 public class ReloadAnimationSpeedHandler {
@@ -51,7 +50,8 @@ public class ReloadAnimationSpeedHandler {
     private static final int STATIC_TRACK_LINE = 0;
     private static final int MAIN_TRACK_INDEX = 4;
 
-    private static boolean wasReloading = false;
+    /** アニメーション速度が変更中であることを示すフラグ */
+    private static boolean wasSpeedModified = false;
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
@@ -60,19 +60,27 @@ public class ReloadAnimationSpeedHandler {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return;
 
-        ReloadState reloadState = IGunOperator.fromLivingEntity(player).getSynReloadState();
+        IGunOperator gunOperator = IGunOperator.fromLivingEntity(player);
+        ReloadState reloadState = gunOperator.getSynReloadState();
         boolean isReloading = reloadState.getStateType().isReloading();
+        boolean isBolting = gunOperator.getSynIsBolting();
 
         if (isReloading) {
             double speed = getReloadSpeedModifier(player);
             if (speed != 1.0) {
                 applySpeedToMainTrack(player, (float) speed);
             }
-            wasReloading = true;
-        } else if (wasReloading) {
-            // リロード終了時に速度倍率をリセット
+            wasSpeedModified = true;
+        } else if (isBolting) {
+            double speed = getBoltSpeedModifier(player);
+            if (speed != 1.0) {
+                applySpeedToMainTrack(player, (float) speed);
+            }
+            wasSpeedModified = true;
+        } else if (wasSpeedModified) {
+            // リロード/ボルト終了時に速度倍率をリセット
             applySpeedToMainTrack(player, 1.0f);
-            wasReloading = false;
+            wasSpeedModified = false;
         }
     }
 
@@ -88,7 +96,28 @@ public class ReloadAnimationSpeedHandler {
         ItemStack mainHand = player.getMainHandItem();
         GunType gunType = GunTypeResolver.resolveFromItem(mainHand);
         if (gunType != null) {
-            net.minecraft.world.entity.ai.attributes.Attribute typeAttr = gunType.getReloadSpeedAttribute().get();
+            Attribute typeAttr = gunType.getReloadSpeedAttribute().get();
+            if (player.getAttributes().hasAttribute(typeAttr)) {
+                typeSpeed = player.getAttributeValue(typeAttr);
+            }
+        }
+
+        return globalSpeed * typeSpeed;
+    }
+
+    private static double getBoltSpeedModifier(LocalPlayer player) {
+        // 全体コッキング速度倍率
+        double globalSpeed = 1.0;
+        if (player.getAttributes().hasAttribute(CustomAttributes.BOLT_ACTION_SPEED.get())) {
+            globalSpeed = player.getAttributeValue(CustomAttributes.BOLT_ACTION_SPEED.get());
+        }
+
+        // 銃種別コッキング速度倍率
+        double typeSpeed = 1.0;
+        ItemStack mainHand = player.getMainHandItem();
+        GunType gunType = GunTypeResolver.resolveFromItem(mainHand);
+        if (gunType != null) {
+            Attribute typeAttr = gunType.getBoltActionSpeedAttribute().get();
             if (player.getAttributes().hasAttribute(typeAttr)) {
                 typeSpeed = player.getAttributeValue(typeAttr);
             }
@@ -143,7 +172,7 @@ public class ReloadAnimationSpeedHandler {
         if (runner instanceof ISpeedModifiable modifiable) {
             modifiable.tacz_attributes$setSpeedMultiplier(speed);
             if (!FMLEnvironment.production && speed != 1.0f) {
-                LOGGER.debug("リロードアニメーション速度倍率設定: {}", speed);
+                LOGGER.debug("アニメーション速度倍率設定: {}", speed);
             }
         }
     }

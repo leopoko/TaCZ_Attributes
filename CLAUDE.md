@@ -65,10 +65,22 @@ src/main/java/com/github/leopoko/tacz_attributes/
 ## ビルド
 
 ```bash
-./gradlew build        # JARをビルド (reobfJar が自動実行される)
-./gradlew runClient    # クライアント起動
-./gradlew runServer    # サーバー起動
+./gradlew build           # JARをビルド (reobfJar が自動実行される)
+./gradlew runClient       # クライアント起動 (Gradleから)
+./gradlew runServer       # サーバー起動
+./gradlew genIntellijRuns # IntelliJのrun設定を生成
 ```
+
+## 開発環境セットアップ
+
+クローン後またはブランチ切り替え後、IntelliJの再生ボタンで起動するには:
+
+```bash
+./gradlew genIntellijRuns
+```
+
+を実行する必要がある。これにより `.idea/runConfigurations/` にrun設定が生成される。
+この設定は `.gitignore` に含まれておりコミットされないため、各開発者がローカルで実行する。
 
 ## 開発上の注意
 

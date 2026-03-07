@@ -15,23 +15,41 @@ Minecraft Forge 1.20.1 用のMODプロジェクト。TaCZ（Timeless and Classic
 
 ## 主な依存MOD
 
-- **TaCZ** (Timeless and Classics Zero) - 銃MOD本体 (CurseMaven経由)
+- **TaCZ** (Timeless and Classics Zero) - 銃MOD本体 (ローカルビルド、JarJar付き`-all.jar`)
 - **ApothicAttributes** - 属性拡張ライブラリ
 - **Placebo** - ApothicAttributesの前提ライブラリ
+
+## TaCZ JARの更新手順
+
+TaCZを更新する場合は、**必ずJarJar付きの`-all.jar`を使用**すること。
+
+```bash
+# 1. TaCZソースディレクトリでJarJarタスクを実行
+cd /path/to/TACZ
+./gradlew jarJar
+
+# 2. 生成された-all.jarをlibsにコピー（ファイル名は-allを除く）
+cp build/libs/tacz-1.20.1-X.X.X-all.jar /path/to/TaCZ_Attributes/libs/tacz-1.20.1-X.X.X.jar
+
+# 3. Gradle deobfキャッシュを削除して再生成させる
+rm -rf ~/.gradle/caches/forge_gradle/deobf_dependencies/libs/tacz-1.20.1/
+```
+
+**重要**: 通常の`./gradlew build`で生成されるJARにはJarJar依存（LuaJ, MixinExtras,
+commons-math3, bcel）が含まれない。`-all.jar`を使わないと開発環境で
+`ClassNotFoundException`/`NoClassDefFoundError` が発生する。
 
 ## プロジェクト構造
 
 ```
 src/main/java/com/github/leopoko/tacz_attributes/
 ├── Tacz_attributes.java          # MODメインクラス (@Mod エントリポイント)
-├── Config.java                   # ForgeConfigSpec によるコンフィグ管理
-├── GunDamageModifier.java        # 銃ダメージ倍率の適用 (LivingHurtEvent)
+├── GunDamageModifier.java        # 銃ダメージ倍率の適用 (EntityHurtByGunEvent)
 ├── attribute/
 │   ├── CustomAttributes.java     # カスタム属性の定義・登録
 │   └── EntityAttributeSetup.java # プレイヤーへの属性バインド
 └── mixin/
-    ├── LivingEntityReloadMixin.java    # リロード速度の変更 (Mixin)
-    └── LivingEntityReloadAccessor.java # privateフィールドアクセス用
+    └── LivingEntityReloadMixin.java # リロード速度の変更 (タイムスタンプスケーリング)
 ```
 
 ## カスタム属性

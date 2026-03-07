@@ -66,6 +66,7 @@ public enum GunType {
     private RegistryObject<Attribute> autoBulletAmountAttribute;
     private RegistryObject<Attribute> burstBulletAmountAttribute;
     private RegistryObject<Attribute> drawSpeedAttribute;
+    private RegistryObject<Attribute> burstSpeedAttribute;
 
     private static final Map<String, GunType> BY_TYPE_ID = new HashMap<>();
 
@@ -251,6 +252,10 @@ public enum GunType {
         return drawSpeedAttribute;
     }
 
+    public RegistryObject<Attribute> getBurstSpeedAttribute() {
+        return burstSpeedAttribute;
+    }
+
     /**
      * TaCZ の銃種文字列（CommonGunIndex.getType() の戻り値）から GunType を取得する。
      * 不明な銃種の場合は null を返す。
@@ -310,6 +315,7 @@ public enum GunType {
             type.autoBulletAmountAttribute = registerBulletAmount(registry, id + "_auto_bullet_amount");
             type.burstBulletAmountAttribute = registerBulletAmount(registry, id + "_burst_bullet_amount");
             type.drawSpeedAttribute = registerSpeedMultiplier(registry, id + "_draw_speed");
+            type.burstSpeedAttribute = registerSpeedMultiplier(registry, id + "_burst_speed");
         }
     }
 

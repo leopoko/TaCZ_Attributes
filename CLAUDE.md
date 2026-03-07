@@ -53,6 +53,7 @@ src/main/java/com/github/leopoko/tacz_attributes/
 │   ├── EntityAttributeSetup.java # プレイヤーへの属性バインド
 │   └── GunType.java              # 銃種enum・銃種別属性の定義
 ├── client/
+│   ├── DrawAnimationSpeedHandler.java   # クライアント側drawアニメーション速度同期
 │   └── ReloadAnimationSpeedHandler.java # クライアント側リロード/ボルトアニメーション速度同期
 ├── mixin/
 │   ├── GunDataMixin.java                # マガジン容量倍率の適用 (ShooterContext連携)
@@ -64,7 +65,8 @@ src/main/java/com/github/leopoko/tacz_attributes/
 │   ├── LocalPlayerAimMixin.java         # ADS移行速度属性の適用 (LocalPlayerAim, クライアント側)
 │   ├── ObjectAnimationRunnerMixin.java  # アニメーション速度倍率のMixin
 │   ├── RecoilMixin.java                 # 反動属性の適用 (CameraSetupEvent, クライアント側)
-│   ├── BulletAmountMixin.java            # 弾数属性の適用 (ModernKineticGunScriptAPI)
+│   ├── BulletAmountMixin.java            # 弾数・バースト速度属性の適用 (ModernKineticGunScriptAPI, サーバー側)
+│   ├── LocalPlayerShootMixin.java       # バースト弾数・速度のクライアント側同期 (LocalPlayerShoot)
 │   ├── ShootInaccuracyMixin.java        # 腰撃ち/ADS精度属性の適用 (ModernKineticGunScriptAPI)
 │   ├── ShootIntervalMixin.java          # 発射レート(RPM)属性の適用 (GunData)
 │   ├── LivingEntityDrawGunMixin.java    # 武器切替速度属性の適用 (LivingEntityDrawGun, サーバー側)
@@ -124,6 +126,7 @@ src/main/java/com/github/leopoko/tacz_attributes/
 | AUTO_BULLET_AMOUNT | `auto_bullet_amount` | 1.0 | 0.01〜100.0 | フルオート弾数倍率 |
 | BURST_BULLET_AMOUNT | `burst_bullet_amount` | 1.0 | 0.01〜100.0 | バースト弾数倍率 |
 | DRAW_SPEED | `draw_speed` | 1.0 | 0.01〜10.0 | 武器切替速度倍率（取り出し・しまい両方） |
+| BURST_SPEED | `burst_speed` | 1.0 | 0.01〜10.0 | バースト内射撃間隔速度倍率（高い値=速いバースト） |
 
 ### 銃種別
 
@@ -176,6 +179,7 @@ src/main/java/com/github/leopoko/tacz_attributes/
 | フルオート弾数 | `_auto_bullet_amount` | 0.01〜100.0 |
 | バースト弾数 | `_burst_bullet_amount` | 0.01〜100.0 |
 | 武器切替速度 | `_draw_speed` | 0.01〜10.0 |
+| バースト速度 | `_burst_speed` | 0.01〜10.0 |
 
 例: `pistol_auto_damage`, `sniper_semi_accuracy`, `rifle_vertical_recoil`, `smg_rpm_multiplier` 等。
 銃種別属性のデフォルト値は倍率系がすべて 1.0（変更なし）、確率・数量系が 0.0（発動なし）。
@@ -270,7 +274,18 @@ src/main/java/com/github/leopoko/tacz_attributes/
 - セミオート弾数 2.0 → 1発のトリガーで発射される弾丸数が2倍
 - フルオート弾数 2.0 → 1ティックで発射される弾丸数が2倍
 - バースト弾数 2.0 → バーストで発射される弾数が2倍（3点バースト → 6点バースト）
-- ModernKineticGunScriptAPI.shootOnce() 内の bulletAmount/cycles を @ModifyVariable で変更
+- サーバー側: ModernKineticGunScriptAPI.shootOnce() 内の bulletAmount/cycles を @ModifyVariable で変更
+- クライアント側: LocalPlayerShoot.doShoot() 内の cycles を @ModifyVariable で変更（反動・音声の同期）
+
+### バースト速度の計算式
+
+`最終burstShootInterval = TaCZ元interval / (burst_speed × 銃種別burst_speed)`
+
+- burst_speed 2.0 → バースト内の射撃間隔が半分 → より速いバースト
+- burst_speed 0.5 → バースト内の射撃間隔が2倍 → より遅いバースト
+- バーストモード時のみ適用
+- サーバー側: ModernKineticGunScriptAPI.shootOnce() 内の burstShootInterval (long ordinal 0) を @ModifyVariable で変更
+- クライアント側: LocalPlayerShoot.doShoot() 内の burstShootInterval (long ordinal 0) を @ModifyVariable で変更（音声・反動タイミングに反映）
 
 ### 武器切替速度の計算式
 

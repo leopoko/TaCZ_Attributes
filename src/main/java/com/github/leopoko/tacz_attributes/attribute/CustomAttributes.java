@@ -187,6 +187,10 @@ public class CustomAttributes {
     public static final RegistryObject<Attribute> DRAW_SPEED = ATTRIBUTES.register("draw_speed",
             () -> new RangedAttribute("attribute.tacz_attributes.draw_speed", 1.0, 0.01, 10.0).setSyncable(true));
 
+    // バースト速度倍率（1.0 = 変更なし、2.0 = バースト間隔半分）
+    public static final RegistryObject<Attribute> BURST_SPEED = ATTRIBUTES.register("burst_speed",
+            () -> new RangedAttribute("attribute.tacz_attributes.burst_speed", 1.0, 0.01, 10.0).setSyncable(true));
+
     // 銃種別属性の一括登録
     static {
         GunType.registerAll(ATTRIBUTES);

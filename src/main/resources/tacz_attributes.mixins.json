@@ -20,7 +20,8 @@
     "ObjectAnimationRunnerMixin",
     "RecoilMixin",
     "LocalPlayerAimMixin",
-    "GunItemRendererWrapperMixin"
+    "GunItemRendererWrapperMixin",
+    "LocalPlayerShootMixin"
   ],
   "injectors": {
     "defaultRequire": 1

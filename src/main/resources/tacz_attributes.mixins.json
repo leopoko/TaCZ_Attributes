@@ -8,6 +8,7 @@
     "LivingEntityReloadMixin"
   ],
   "client": [
+    "ObjectAnimationRunnerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

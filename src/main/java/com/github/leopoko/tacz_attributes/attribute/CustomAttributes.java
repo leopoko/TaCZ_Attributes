@@ -17,4 +17,9 @@ public class CustomAttributes {
 
     public static final RegistryObject<Attribute> RELOAD_SPEED = ATTRIBUTES.register("reload_speed",
             () -> new RangedAttribute("attribute.tacz_attributes.reload_speed", 1.0, 0.1, 20.0).setSyncable(true));
+
+    // 銃種別属性の一括登録
+    static {
+        GunType.registerAll(ATTRIBUTES);
+    }
 }

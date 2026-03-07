@@ -1,10 +1,14 @@
 package com.github.leopoko.tacz_attributes.mixin;
 
 import com.github.leopoko.tacz_attributes.attribute.CustomAttributes;
+import com.github.leopoko.tacz_attributes.attribute.GunType;
+import com.github.leopoko.tacz_attributes.util.GunTypeResolver;
 import com.tacz.guns.api.entity.ReloadState;
 import com.tacz.guns.entity.shooter.LivingEntityReload;
 import com.tacz.guns.entity.shooter.ShooterDataHolder;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -79,9 +83,25 @@ public abstract class LivingEntityReloadMixin {
 
     @Unique
     private double tacz_attributes$getReloadSpeedModifier() {
-        if (shooter != null && shooter.getAttributes().hasAttribute(CustomAttributes.RELOAD_SPEED.get())) {
-            return shooter.getAttributeValue(CustomAttributes.RELOAD_SPEED.get());
+        if (shooter == null) return 1.0;
+
+        // 全体リロード速度倍率
+        double globalSpeed = 1.0;
+        if (shooter.getAttributes().hasAttribute(CustomAttributes.RELOAD_SPEED.get())) {
+            globalSpeed = shooter.getAttributeValue(CustomAttributes.RELOAD_SPEED.get());
         }
-        return 1.0;
+
+        // 銃種別リロード速度倍率
+        double typeSpeed = 1.0;
+        ItemStack mainHand = shooter.getMainHandItem();
+        GunType gunType = GunTypeResolver.resolveFromItem(mainHand);
+        if (gunType != null) {
+            Attribute typeAttr = gunType.getReloadSpeedAttribute().get();
+            if (shooter.getAttributes().hasAttribute(typeAttr)) {
+                typeSpeed = shooter.getAttributeValue(typeAttr);
+            }
+        }
+
+        return globalSpeed * typeSpeed;
     }
 }

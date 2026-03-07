@@ -1,0 +1,18 @@
+{
+  "attribute.tacz_attributes.gun_damage": "\u9283\u30c0\u30e1\u30fc\u30b8",
+  "attribute.tacz_attributes.reload_speed": "\u30ea\u30ed\u30fc\u30c9\u901f\u5ea6",
+  "attribute.tacz_attributes.pistol_damage": "\u30d4\u30b9\u30c8\u30eb\u30c0\u30e1\u30fc\u30b8",
+  "attribute.tacz_attributes.pistol_reload_speed": "\u30d4\u30b9\u30c8\u30eb\u30ea\u30ed\u30fc\u30c9\u901f\u5ea6",
+  "attribute.tacz_attributes.sniper_damage": "\u30b9\u30ca\u30a4\u30d1\u30fc\u30c0\u30e1\u30fc\u30b8",
+  "attribute.tacz_attributes.sniper_reload_speed": "\u30b9\u30ca\u30a4\u30d1\u30fc\u30ea\u30ed\u30fc\u30c9\u901f\u5ea6",
+  "attribute.tacz_attributes.rifle_damage": "\u30e9\u30a4\u30d5\u30eb\u30c0\u30e1\u30fc\u30b8",
+  "attribute.tacz_attributes.rifle_reload_speed": "\u30e9\u30a4\u30d5\u30eb\u30ea\u30ed\u30fc\u30c9\u901f\u5ea6",
+  "attribute.tacz_attributes.shotgun_damage": "\u30b7\u30e7\u30c3\u30c8\u30ac\u30f3\u30c0\u30e1\u30fc\u30b8",
+  "attribute.tacz_attributes.shotgun_reload_speed": "\u30b7\u30e7\u30c3\u30c8\u30ac\u30f3\u30ea\u30ed\u30fc\u30c9\u901f\u5ea6",
+  "attribute.tacz_attributes.smg_damage": "SMG\u30c0\u30e1\u30fc\u30b8",
+  "attribute.tacz_attributes.smg_reload_speed": "SMG\u30ea\u30ed\u30fc\u30c9\u901f\u5ea6",
+  "attribute.tacz_attributes.rpg_damage": "RPG\u30c0\u30e1\u30fc\u30b8",
+  "attribute.tacz_attributes.rpg_reload_speed": "RPG\u30ea\u30ed\u30fc\u30c9\u901f\u5ea6",
+  "attribute.tacz_attributes.mg_damage": "MG\u30c0\u30e1\u30fc\u30b8",
+  "attribute.tacz_attributes.mg_reload_speed": "MG\u30ea\u30ed\u30fc\u30c9\u901f\u5ea6"
+}

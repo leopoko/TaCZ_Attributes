@@ -19,19 +19,36 @@ Minecraft Forge 1.20.1 用のMODプロジェクト。TaCZ（Timeless and Classic
 - **ApothicAttributes** - 属性拡張ライブラリ
 - **Placebo** - ApothicAttributesの前提ライブラリ
 
+## TaCZ依存の管理
+
+TaCZはCurseMavenから取得する。CurseForgeの公開JARにはJarJar依存（LuaJ, MixinExtras,
+commons-math3, bcel）が含まれており、開発環境でもForgeのJarInJarロケーターが
+自動的に展開・ロードする。
+
+```gradle
+// build.gradle の dependencies ブロック
+implementation fg.deobf("curse.maven:timeless-and-classics-zero-1028108:<fileId>")
+```
+
+**TaCZバージョン更新時**: CurseForgeのファイルIDを更新する。
+ファイルIDは https://www.curseforge.com/minecraft/mc-mods/timeless-and-classics-zero/files
+から確認できる。
+
+**重要**: ローカルビルドのJARを`libs/`に置く方式は使わないこと。
+ローカルJARではJarJar依存がForgeのクラスローダーに正しくロードされず、
+`ClassNotFoundException`/`NoClassDefFoundError` が発生する。
+
 ## プロジェクト構造
 
 ```
 src/main/java/com/github/leopoko/tacz_attributes/
 ├── Tacz_attributes.java          # MODメインクラス (@Mod エントリポイント)
-├── Config.java                   # ForgeConfigSpec によるコンフィグ管理
-├── GunDamageModifier.java        # 銃ダメージ倍率の適用 (LivingHurtEvent)
+├── GunDamageModifier.java        # 銃ダメージ倍率の適用 (EntityHurtByGunEvent)
 ├── attribute/
 │   ├── CustomAttributes.java     # カスタム属性の定義・登録
 │   └── EntityAttributeSetup.java # プレイヤーへの属性バインド
 └── mixin/
-    ├── LivingEntityReloadMixin.java    # リロード速度の変更 (Mixin)
-    └── LivingEntityReloadAccessor.java # privateフィールドアクセス用
+    └── LivingEntityReloadMixin.java # リロード速度の変更 (タイムスタンプスケーリング)
 ```
 
 ## カスタム属性
@@ -60,3 +77,4 @@ src/main/java/com/github/leopoko/tacz_attributes/
 - `gradle.properties` のテンプレート変数が `mods.toml` と `pack.mcmeta` に展開される
 - 開発環境でのみデバッグログを出力する（`FMLEnvironment.production` で判定）
 - ソースのエンコーディングは UTF-8
+- `build/libs/` にJARが残っていると `runClient` 等でモジュール競合（`ResolutionException`）が発生する。`build.gradle` に自動クリーンフックが設定済み

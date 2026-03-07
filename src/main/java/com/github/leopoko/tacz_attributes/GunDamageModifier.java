@@ -2,8 +2,11 @@ package com.github.leopoko.tacz_attributes;
 
 import com.github.leopoko.tacz_attributes.attribute.CustomAttributes;
 import com.github.leopoko.tacz_attributes.attribute.GunType;
+import com.github.leopoko.tacz_attributes.util.FireModeHelper;
 import com.github.leopoko.tacz_attributes.util.GunTypeResolver;
+import com.tacz.guns.api.entity.IGunOperator;
 import com.tacz.guns.api.event.common.EntityHurtByGunEvent;
+import com.tacz.guns.api.item.gun.FireMode;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -25,34 +28,80 @@ public class GunDamageModifier {
         LivingEntity attacker = event.getAttacker();
         if (attacker == null) return;
 
+        ResourceLocation gunId = event.getGunId();
+        GunType gunType = GunTypeResolver.resolve(gunId);
+
         // 全体ダメージ倍率
-        double globalModifier = 1.0;
-        if (attacker.getAttributes().hasAttribute(CustomAttributes.GUN_DAMAGE.get())) {
-            globalModifier = attacker.getAttributeValue(CustomAttributes.GUN_DAMAGE.get());
-        }
+        double globalModifier = getAttributeValue(attacker, CustomAttributes.GUN_DAMAGE.get());
 
         // 銃種別ダメージ倍率
         double typeModifier = 1.0;
-        ResourceLocation gunId = event.getGunId();
-        GunType gunType = GunTypeResolver.resolve(gunId);
         if (gunType != null) {
-            Attribute typeAttr = gunType.getDamageAttribute().get();
-            if (attacker.getAttributes().hasAttribute(typeAttr)) {
-                typeModifier = attacker.getAttributeValue(typeAttr);
+            typeModifier = getAttributeValue(attacker, gunType.getDamageAttribute().get());
+        }
+
+        // ADS / 腰撃ちダメージ倍率
+        boolean isAds = IGunOperator.fromLivingEntity(attacker).getSynIsAiming();
+        double adsHipGlobal;
+        double adsHipType = 1.0;
+        if (isAds) {
+            adsHipGlobal = getAttributeValue(attacker, CustomAttributes.ADS_DAMAGE.get());
+            if (gunType != null) {
+                adsHipType = getAttributeValue(attacker, gunType.getAdsDamageAttribute().get());
+            }
+        } else {
+            adsHipGlobal = getAttributeValue(attacker, CustomAttributes.HIP_FIRE_DAMAGE.get());
+            if (gunType != null) {
+                adsHipType = getAttributeValue(attacker, gunType.getHipFireDamageAttribute().get());
             }
         }
 
-        double combinedModifier = globalModifier * typeModifier;
-        if (combinedModifier == 1.0) return;
+        // 射撃モード別ダメージ倍率
+        FireMode fireMode = FireModeHelper.getFireMode(attacker.getMainHandItem());
+        double fireModeGlobal = FireModeHelper.getAttributeValue(attacker, FireModeHelper.getGlobalDamageAttribute(fireMode));
+        double fireModeType = FireModeHelper.getAttributeValue(attacker, FireModeHelper.getTypeDamageAttribute(gunType, fireMode));
 
-        float modifiedDamage = (float) (event.getBaseAmount() * combinedModifier);
+        double combinedModifier = globalModifier * typeModifier * adsHipGlobal * adsHipType * fireModeGlobal * fireModeType;
+        if (combinedModifier != 1.0) {
+            float modifiedDamage = (float) (event.getBaseAmount() * combinedModifier);
 
-        if (!FMLEnvironment.production) {
-            LOGGER.info("[TaCZ Attributes] 銃ダメージ倍率適用: {} -> {} (全体: {}, 銃種[{}]: {})",
-                    event.getBaseAmount(), modifiedDamage, globalModifier,
-                    gunType != null ? gunType.getTypeId() : "unknown", typeModifier);
+            if (!FMLEnvironment.production) {
+                LOGGER.info("[TaCZ Attributes] 銃ダメージ倍率適用: {} -> {} (全体: {}, 銃種[{}]: {}, {}: {}×{}, モード[{}]: {}×{})",
+                        event.getBaseAmount(), modifiedDamage, globalModifier,
+                        gunType != null ? gunType.getTypeId() : "unknown", typeModifier,
+                        isAds ? "ADS" : "腰撃ち", adsHipGlobal, adsHipType,
+                        fireMode != null ? fireMode.name() : "unknown", fireModeGlobal, fireModeType);
+            }
+
+            event.setBaseAmount(modifiedDamage);
         }
 
-        event.setBaseAmount(modifiedDamage);
+        // ヘッドショット倍率の適用
+        if (event.isHeadShot()) {
+            double hsGlobal = getAttributeValue(attacker, CustomAttributes.HEADSHOT_MULTIPLIER.get());
+            double hsType = 1.0;
+            if (gunType != null) {
+                hsType = getAttributeValue(attacker, gunType.getHeadshotMultiplierAttribute().get());
+            }
+            double hsCombined = hsGlobal * hsType;
+            if (hsCombined != 1.0) {
+                float newHsMultiplier = (float) (event.getHeadshotMultiplier() * hsCombined);
+
+                if (!FMLEnvironment.production) {
+                    LOGGER.info("[TaCZ Attributes] ヘッドショット倍率適用: {} -> {} (全体: {}, 銃種[{}]: {})",
+                            event.getHeadshotMultiplier(), newHsMultiplier, hsGlobal,
+                            gunType != null ? gunType.getTypeId() : "unknown", hsType);
+                }
+
+                event.setHeadshotMultiplier(newHsMultiplier);
+            }
+        }
+    }
+
+    private static double getAttributeValue(LivingEntity entity, Attribute attribute) {
+        if (entity.getAttributes().hasAttribute(attribute)) {
+            return entity.getAttributeValue(attribute);
+        }
+        return 1.0;
     }
 }

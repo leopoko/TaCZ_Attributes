@@ -8,10 +8,19 @@
     "LivingEntityReloadMixin",
     "LivingEntityBoltMixin",
     "GunDataMixin",
-    "ModernKineticGunScriptAPIMixin"
+    "ModernKineticGunScriptAPIMixin",
+    "ShootInaccuracyMixin",
+    "EntityKineticBulletMixin",
+    "ShootIntervalMixin",
+    "LivingEntityAimMixin",
+    "BulletAmountMixin",
+    "LivingEntityDrawGunMixin"
   ],
   "client": [
-    "ObjectAnimationRunnerMixin"
+    "ObjectAnimationRunnerMixin",
+    "RecoilMixin",
+    "LocalPlayerAimMixin",
+    "GunItemRendererWrapperMixin"
   ],
   "injectors": {
     "defaultRequire": 1

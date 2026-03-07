@@ -1,0 +1,18 @@
+{
+  "attribute.tacz_attributes.gun_damage": "Gun Damage",
+  "attribute.tacz_attributes.reload_speed": "Reload Speed",
+  "attribute.tacz_attributes.pistol_damage": "Pistol Damage",
+  "attribute.tacz_attributes.pistol_reload_speed": "Pistol Reload Speed",
+  "attribute.tacz_attributes.sniper_damage": "Sniper Damage",
+  "attribute.tacz_attributes.sniper_reload_speed": "Sniper Reload Speed",
+  "attribute.tacz_attributes.rifle_damage": "Rifle Damage",
+  "attribute.tacz_attributes.rifle_reload_speed": "Rifle Reload Speed",
+  "attribute.tacz_attributes.shotgun_damage": "Shotgun Damage",
+  "attribute.tacz_attributes.shotgun_reload_speed": "Shotgun Reload Speed",
+  "attribute.tacz_attributes.smg_damage": "SMG Damage",
+  "attribute.tacz_attributes.smg_reload_speed": "SMG Reload Speed",
+  "attribute.tacz_attributes.rpg_damage": "RPG Damage",
+  "attribute.tacz_attributes.rpg_reload_speed": "RPG Reload Speed",
+  "attribute.tacz_attributes.mg_damage": "MG Damage",
+  "attribute.tacz_attributes.mg_reload_speed": "MG Reload Speed"
+}

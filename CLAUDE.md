@@ -44,19 +44,44 @@ implementation fg.deobf("curse.maven:timeless-and-classics-zero-1028108:<fileId>
 src/main/java/com/github/leopoko/tacz_attributes/
 ├── Tacz_attributes.java          # MODメインクラス (@Mod エントリポイント)
 ├── GunDamageModifier.java        # 銃ダメージ倍率の適用 (EntityHurtByGunEvent)
+├── api/
+│   └── ISpeedModifiable.java     # アニメーション速度倍率のダックインターフェース
 ├── attribute/
 │   ├── CustomAttributes.java     # カスタム属性の定義・登録
-│   └── EntityAttributeSetup.java # プレイヤーへの属性バインド
-└── mixin/
-    └── LivingEntityReloadMixin.java # リロード速度の変更 (タイムスタンプスケーリング)
+│   ├── EntityAttributeSetup.java # プレイヤーへの属性バインド
+│   └── GunType.java              # 銃種enum・銃種別属性の定義
+├── client/
+│   └── ReloadAnimationSpeedHandler.java # クライアント側リロードアニメーション速度同期
+├── mixin/
+│   ├── LivingEntityReloadMixin.java     # リロード速度の変更 (タイムスタンプスケーリング)
+│   └── ObjectAnimationRunnerMixin.java  # アニメーション速度倍率のMixin
+└── util/
+    └── GunTypeResolver.java      # gunId/ItemStack → GunType 解決ユーティリティ
 ```
 
 ## カスタム属性
 
+### 全銃共通
+
 | 属性 | ID | デフォルト | 範囲 | 説明 |
 |------|-----|-----------|------|------|
-| GUN_DAMAGE | `gun_damage` | 1.0 | 0.0〜1024.0 | 銃弾ダメージの倍率 |
-| RELOAD_SPEED | `reload_speed` | 1.0 | 0.1〜20.0 | リロード速度の倍率 |
+| GUN_DAMAGE | `gun_damage` | 1.0 | 0.0〜1024.0 | 全銃弾ダメージの倍率 |
+| RELOAD_SPEED | `reload_speed` | 1.0 | 0.1〜20.0 | 全銃リロード速度の倍率 |
+
+### 銃種別（最終倍率 = 全体 × 銃種別）
+
+| 銃種 | ダメージ属性 | リロード速度属性 |
+|------|------------|----------------|
+| PISTOL | `pistol_damage` | `pistol_reload_speed` |
+| SNIPER | `sniper_damage` | `sniper_reload_speed` |
+| RIFLE | `rifle_damage` | `rifle_reload_speed` |
+| SHOTGUN | `shotgun_damage` | `shotgun_reload_speed` |
+| SMG | `smg_damage` | `smg_reload_speed` |
+| RPG | `rpg_damage` | `rpg_reload_speed` |
+| MG | `mg_damage` | `mg_reload_speed` |
+
+銃種別属性のデフォルト値はすべて 1.0（変更なし）、範囲はダメージ: 0.0〜1024.0、リロード速度: 0.1〜20.0。
+銃種は TaCZ の `GunTabType` に準拠し、`GunType` enum で管理される。
 
 ## MOD ID
 
@@ -65,10 +90,22 @@ src/main/java/com/github/leopoko/tacz_attributes/
 ## ビルド
 
 ```bash
-./gradlew build        # JARをビルド (reobfJar が自動実行される)
-./gradlew runClient    # クライアント起動
-./gradlew runServer    # サーバー起動
+./gradlew build           # JARをビルド (reobfJar が自動実行される)
+./gradlew runClient       # クライアント起動 (Gradleから)
+./gradlew runServer       # サーバー起動
+./gradlew genIntellijRuns # IntelliJのrun設定を生成
 ```
+
+## 開発環境セットアップ
+
+クローン後またはブランチ切り替え後、IntelliJの再生ボタンで起動するには:
+
+```bash
+./gradlew genIntellijRuns
+```
+
+を実行する必要がある。これにより `.idea/runConfigurations/` にrun設定が生成される。
+この設定は `.gitignore` に含まれておりコミットされないため、各開発者がローカルで実行する。
 
 ## 開発上の注意
 

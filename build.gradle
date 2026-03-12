@@ -13,6 +13,7 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
+    id 'me.modmuss50.mod-publish-plugin' version '0.8.4'
 }
 
 apply plugin: 'org.spongepowered.mixin'
@@ -220,4 +221,47 @@ gradle.taskGraph.whenReady { graph ->
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+
+// === CHANGELOG.md から最新バージョンのセクションのみ抽出 ===
+def extractLatestChangelog() {
+    def changelogFile = file("CHANGELOG.md")
+    if (!changelogFile.exists()) return "v${mod_version}"
+
+    def lines = changelogFile.text.readLines()
+    def result = []
+    def found = false
+
+    for (line in lines) {
+        if (line.matches(/^## \[.+\].*/) && !found) {
+            found = true
+            continue
+        }
+        if (line.matches(/^## \[.+\].*/) && found) {
+            break
+        }
+        if (found) {
+            result << line
+        }
+    }
+
+    def text = result.join("\n").trim()
+    return text.isEmpty() ? "v${mod_version}" : text
+}
+
+// === MOD公開設定 ===
+publishMods {
+    changelog = extractLatestChangelog()
+    type = STABLE
+
+    curseforge {
+        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+        projectId = "1113285"
+        file = tasks.named('jar').flatMap { it.archiveFile }
+        minecraftVersions.add("1.20.1")
+        javaVersions.add(JavaVersion.VERSION_17)
+        modLoaders.add("forge")
+        requires("timeless-and-classics-zero")
+        requires("apothic-attributes")
+    }
 }

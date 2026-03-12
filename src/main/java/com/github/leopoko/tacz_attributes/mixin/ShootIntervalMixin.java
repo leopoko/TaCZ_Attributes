@@ -5,6 +5,7 @@ import com.github.leopoko.tacz_attributes.attribute.GunType;
 import com.github.leopoko.tacz_attributes.util.GunTypeResolver;
 import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.resource.pojo.data.gun.GunData;
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.ItemStack;
@@ -35,10 +36,10 @@ public class ShootIntervalMixin {
         if (shooter == null) return;
 
         GunType gunType = GunTypeResolver.resolveFromItem(gunStack);
-        double globalRpm = tacz_attributes$getAttributeValue(shooter, CustomAttributes.RPM_MULTIPLIER.get());
+        double globalRpm = tacz_attributes$getAttributeValue(shooter, CustomAttributes.RPM_MULTIPLIER);
         double typeRpm = 1.0;
         if (gunType != null) {
-            typeRpm = tacz_attributes$getAttributeValue(shooter, gunType.getRpmMultiplierAttribute().get());
+            typeRpm = tacz_attributes$getAttributeValue(shooter, gunType.getRpmMultiplierAttribute());
         }
         double combined = globalRpm * typeRpm;
         if (combined == 1.0) return;
@@ -50,7 +51,7 @@ public class ShootIntervalMixin {
     }
 
     @Unique
-    private static double tacz_attributes$getAttributeValue(LivingEntity entity, Attribute attribute) {
+    private static double tacz_attributes$getAttributeValue(LivingEntity entity, Holder<Attribute> attribute) {
         if (entity.getAttributes().hasAttribute(attribute)) {
             return entity.getAttributeValue(attribute);
         }

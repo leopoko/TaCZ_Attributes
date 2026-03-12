@@ -7,6 +7,7 @@ import com.tacz.guns.entity.EntityKineticBullet;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -57,18 +58,18 @@ public abstract class EntityKineticBulletMixin extends Projectile {
         GunType gunType = GunTypeResolver.resolve(this.gunId);
 
         // 基本値を加算（デフォルト0.0 = 追加なし）
-        double globalBase = tacz_attributes$getKnockbackBaseValue(shooter, CustomAttributes.KNOCKBACK_BASE.get());
+        double globalBase = tacz_attributes$getKnockbackBaseValue(shooter, CustomAttributes.KNOCKBACK_BASE);
         double typeBase = 0.0;
         if (gunType != null) {
-            typeBase = tacz_attributes$getKnockbackBaseValue(shooter, gunType.getKnockbackBaseAttribute().get());
+            typeBase = tacz_attributes$getKnockbackBaseValue(shooter, gunType.getKnockbackBaseAttribute());
         }
         double withBase = knockback + globalBase + typeBase;
 
         // 倍率を適用
-        double globalMult = tacz_attributes$getAttributeValue(shooter, CustomAttributes.KNOCKBACK_MULTIPLIER.get());
+        double globalMult = tacz_attributes$getAttributeValue(shooter, CustomAttributes.KNOCKBACK_MULTIPLIER);
         double typeMult = 1.0;
         if (gunType != null) {
-            typeMult = tacz_attributes$getAttributeValue(shooter, gunType.getKnockbackMultiplierAttribute().get());
+            typeMult = tacz_attributes$getAttributeValue(shooter, gunType.getKnockbackMultiplierAttribute());
         }
         double combinedMult = globalMult * typeMult;
 
@@ -93,10 +94,10 @@ public abstract class EntityKineticBulletMixin extends Projectile {
         if (!(owner instanceof LivingEntity shooter)) return;
 
         GunType gunType = GunTypeResolver.resolve(this.gunId);
-        double globalPierce = tacz_attributes$getAttributeValue(shooter, CustomAttributes.PIERCE_MULTIPLIER.get());
+        double globalPierce = tacz_attributes$getAttributeValue(shooter, CustomAttributes.PIERCE_MULTIPLIER);
         double typePierce = 1.0;
         if (gunType != null) {
-            typePierce = tacz_attributes$getAttributeValue(shooter, gunType.getPierceMultiplierAttribute().get());
+            typePierce = tacz_attributes$getAttributeValue(shooter, gunType.getPierceMultiplierAttribute());
         }
         double combined = globalPierce * typePierce;
         if (combined == 1.0) return;
@@ -107,7 +108,7 @@ public abstract class EntityKineticBulletMixin extends Projectile {
     }
 
     @Unique
-    private static double tacz_attributes$getAttributeValue(LivingEntity entity, Attribute attribute) {
+    private static double tacz_attributes$getAttributeValue(LivingEntity entity, Holder<Attribute> attribute) {
         if (entity.getAttributes().hasAttribute(attribute)) {
             return entity.getAttributeValue(attribute);
         }
@@ -115,7 +116,7 @@ public abstract class EntityKineticBulletMixin extends Projectile {
     }
 
     @Unique
-    private static double tacz_attributes$getKnockbackBaseValue(LivingEntity entity, Attribute attribute) {
+    private static double tacz_attributes$getKnockbackBaseValue(LivingEntity entity, Holder<Attribute> attribute) {
         if (entity.getAttributes().hasAttribute(attribute)) {
             return entity.getAttributeValue(attribute);
         }

@@ -9,7 +9,6 @@ import com.tacz.guns.api.entity.ReloadState;
 import com.tacz.guns.entity.shooter.LivingEntityReload;
 import com.tacz.guns.entity.shooter.ShooterDataHolder;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -125,8 +124,8 @@ public abstract class LivingEntityReloadMixin {
 
         // 全体リロード速度倍率
         double globalSpeed = 1.0;
-        if (shooter.getAttributes().hasAttribute(CustomAttributes.RELOAD_SPEED.get())) {
-            globalSpeed = shooter.getAttributeValue(CustomAttributes.RELOAD_SPEED.get());
+        if (shooter.getAttributes().hasAttribute(CustomAttributes.RELOAD_SPEED)) {
+            globalSpeed = shooter.getAttributeValue(CustomAttributes.RELOAD_SPEED);
         }
 
         // 銃種別リロード速度倍率
@@ -134,7 +133,7 @@ public abstract class LivingEntityReloadMixin {
         ItemStack mainHand = shooter.getMainHandItem();
         GunType gunType = GunTypeResolver.resolveFromItem(mainHand);
         if (gunType != null) {
-            Attribute typeAttr = gunType.getReloadSpeedAttribute().get();
+            var typeAttr = gunType.getReloadSpeedAttribute();
             if (shooter.getAttributes().hasAttribute(typeAttr)) {
                 typeSpeed = shooter.getAttributeValue(typeAttr);
             }

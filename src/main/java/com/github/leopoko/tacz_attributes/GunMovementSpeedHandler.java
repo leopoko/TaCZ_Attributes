@@ -4,17 +4,17 @@ import com.github.leopoko.tacz_attributes.attribute.CustomAttributes;
 import com.github.leopoko.tacz_attributes.attribute.GunType;
 import com.github.leopoko.tacz_attributes.util.GunTypeResolver;
 import com.tacz.guns.api.item.IGun;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.common.Mod;
-import java.util.UUID;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 /**
  * 銃装備時の移動速度属性を適用するイベントハンドラ。
@@ -23,22 +23,21 @@ import java.util.UUID;
  * MULTIPLY_TOTAL の AttributeModifier を MOVEMENT_SPEED に適用する。
  * TaCZ 自身の速度修正（重量・エイム・リロード）の上に乗算される。
  */
-@Mod.EventBusSubscriber(modid = Tacz_attributes.MODID)
+@EventBusSubscriber(modid = Tacz_attributes.MODID)
 public class GunMovementSpeedHandler {
 
-    private static final UUID TACZ_ATTR_SPEED_MODIFIER_UUID = UUID.fromString("a3c7e8f1-5d2b-4a96-b8e3-1f7d9c6a2e04");
+    private static final ResourceLocation TACZ_ATTR_SPEED_MODIFIER_ID = ResourceLocation.fromNamespaceAndPath(Tacz_attributes.MODID, "gun_movement_speed");
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
-        if (event.side != LogicalSide.SERVER) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (event.getEntity().level().isClientSide()) return;
 
-        Player player = event.player;
+        Player player = event.getEntity();
         AttributeInstance speedAttr = player.getAttribute(Attributes.MOVEMENT_SPEED);
         if (speedAttr == null) return;
 
         // 既存のModifierを除去
-        speedAttr.removeModifier(TACZ_ATTR_SPEED_MODIFIER_UUID);
+        speedAttr.removeModifier(TACZ_ATTR_SPEED_MODIFIER_ID);
 
         // 銃を持っていない場合は何もしない
         ItemStack mainHand = player.getMainHandItem();
@@ -46,10 +45,10 @@ public class GunMovementSpeedHandler {
         if (iGun == null) return;
 
         GunType gunType = GunTypeResolver.resolveFromItem(mainHand);
-        double globalSpeed = getAttributeValue(player, CustomAttributes.GUN_MOVEMENT_SPEED.get());
+        double globalSpeed = getAttributeValue(player, CustomAttributes.GUN_MOVEMENT_SPEED);
         double typeSpeed = 1.0;
         if (gunType != null) {
-            typeSpeed = getAttributeValue(player, gunType.getGunMovementSpeedAttribute().get());
+            typeSpeed = getAttributeValue(player, gunType.getGunMovementSpeedAttribute());
         }
         double combined = globalSpeed * typeSpeed;
 
@@ -60,11 +59,11 @@ public class GunMovementSpeedHandler {
         double amount = combined - 1.0;
 
         speedAttr.addTransientModifier(new AttributeModifier(
-                TACZ_ATTR_SPEED_MODIFIER_UUID, "TaCZ Attributes Gun Movement Speed",
-                amount, AttributeModifier.Operation.MULTIPLY_TOTAL));
+                TACZ_ATTR_SPEED_MODIFIER_ID, amount,
+                AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
     }
 
-    private static double getAttributeValue(Player player, Attribute attribute) {
+    private static double getAttributeValue(Player player, Holder<Attribute> attribute) {
         if (player.getAttributes().hasAttribute(attribute)) {
             return player.getAttributeValue(attribute);
         }

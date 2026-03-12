@@ -8,6 +8,7 @@ import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.entity.shooter.LivingEntityDrawGun;
 import com.tacz.guns.entity.shooter.ShooterDataHolder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.ItemStack;
@@ -96,20 +97,20 @@ public class LivingEntityDrawGunMixin {
     private double tacz_attributes$getDrawSpeedModifier() {
         if (this.shooter == null) return 1.0;
 
-        double globalSpeed = tacz_attributes$getAttributeValue(this.shooter, CustomAttributes.DRAW_SPEED.get());
+        double globalSpeed = tacz_attributes$getAttributeValue(this.shooter, CustomAttributes.DRAW_SPEED);
 
         // 銃種は切り替え先の武器（メインハンド）で判定
         GunType gunType = GunTypeResolver.resolveFromItem(this.shooter.getMainHandItem());
         double typeSpeed = 1.0;
         if (gunType != null) {
-            typeSpeed = tacz_attributes$getAttributeValue(this.shooter, gunType.getDrawSpeedAttribute().get());
+            typeSpeed = tacz_attributes$getAttributeValue(this.shooter, gunType.getDrawSpeedAttribute());
         }
 
         return globalSpeed * typeSpeed;
     }
 
     @Unique
-    private static double tacz_attributes$getAttributeValue(LivingEntity entity, Attribute attribute) {
+    private static double tacz_attributes$getAttributeValue(LivingEntity entity, Holder<Attribute> attribute) {
         if (entity.getAttributes().hasAttribute(attribute)) {
             return entity.getAttributeValue(attribute);
         }

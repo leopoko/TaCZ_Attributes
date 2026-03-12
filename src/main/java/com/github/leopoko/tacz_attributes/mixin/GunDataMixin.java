@@ -5,7 +5,6 @@ import com.github.leopoko.tacz_attributes.attribute.GunType;
 import com.github.leopoko.tacz_attributes.util.ShooterContext;
 import com.tacz.guns.resource.pojo.data.gun.GunData;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -58,15 +57,15 @@ public class GunDataMixin {
 
         // 全体マガジン容量倍率
         double globalModifier = 1.0;
-        if (shooter.getAttributes().hasAttribute(CustomAttributes.MAGAZINE_CAPACITY.get())) {
-            globalModifier = shooter.getAttributeValue(CustomAttributes.MAGAZINE_CAPACITY.get());
+        if (shooter.getAttributes().hasAttribute(CustomAttributes.MAGAZINE_CAPACITY)) {
+            globalModifier = shooter.getAttributeValue(CustomAttributes.MAGAZINE_CAPACITY);
         }
 
         // 銃種別マガジン容量倍率
         double typeModifier = 1.0;
         GunType gunType = ctx.gunType();
         if (gunType != null) {
-            Attribute typeAttr = gunType.getMagazineCapacityAttribute().get();
+            var typeAttr = gunType.getMagazineCapacityAttribute();
             if (shooter.getAttributes().hasAttribute(typeAttr)) {
                 typeModifier = shooter.getAttributeValue(typeAttr);
             }

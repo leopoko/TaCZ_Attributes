@@ -8,13 +8,14 @@ import com.tacz.guns.api.entity.IGunOperator;
 import com.tacz.guns.api.event.common.EntityHurtByGunEvent;
 import com.tacz.guns.api.item.gun.FireMode;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.fml.common.EventBusSubscriber;
 
-@Mod.EventBusSubscriber(modid = Tacz_attributes.MODID)
+@EventBusSubscriber(modid = Tacz_attributes.MODID)
 public class GunDamageModifier {
     @SubscribeEvent
     public static void onGunHurt(EntityHurtByGunEvent.Pre event) {
@@ -27,12 +28,12 @@ public class GunDamageModifier {
         GunType gunType = GunTypeResolver.resolve(gunId);
 
         // 全体ダメージ倍率
-        double globalModifier = getAttributeValue(attacker, CustomAttributes.GUN_DAMAGE.get());
+        double globalModifier = getAttributeValue(attacker, CustomAttributes.GUN_DAMAGE);
 
         // 銃種別ダメージ倍率
         double typeModifier = 1.0;
         if (gunType != null) {
-            typeModifier = getAttributeValue(attacker, gunType.getDamageAttribute().get());
+            typeModifier = getAttributeValue(attacker, gunType.getDamageAttribute());
         }
 
         // ADS / 腰撃ちダメージ倍率
@@ -40,14 +41,14 @@ public class GunDamageModifier {
         double adsHipGlobal;
         double adsHipType = 1.0;
         if (isAds) {
-            adsHipGlobal = getAttributeValue(attacker, CustomAttributes.ADS_DAMAGE.get());
+            adsHipGlobal = getAttributeValue(attacker, CustomAttributes.ADS_DAMAGE);
             if (gunType != null) {
-                adsHipType = getAttributeValue(attacker, gunType.getAdsDamageAttribute().get());
+                adsHipType = getAttributeValue(attacker, gunType.getAdsDamageAttribute());
             }
         } else {
-            adsHipGlobal = getAttributeValue(attacker, CustomAttributes.HIP_FIRE_DAMAGE.get());
+            adsHipGlobal = getAttributeValue(attacker, CustomAttributes.HIP_FIRE_DAMAGE);
             if (gunType != null) {
-                adsHipType = getAttributeValue(attacker, gunType.getHipFireDamageAttribute().get());
+                adsHipType = getAttributeValue(attacker, gunType.getHipFireDamageAttribute());
             }
         }
 
@@ -65,10 +66,10 @@ public class GunDamageModifier {
 
         // ヘッドショット倍率の適用
         if (event.isHeadShot()) {
-            double hsGlobal = getAttributeValue(attacker, CustomAttributes.HEADSHOT_MULTIPLIER.get());
+            double hsGlobal = getAttributeValue(attacker, CustomAttributes.HEADSHOT_MULTIPLIER);
             double hsType = 1.0;
             if (gunType != null) {
-                hsType = getAttributeValue(attacker, gunType.getHeadshotMultiplierAttribute().get());
+                hsType = getAttributeValue(attacker, gunType.getHeadshotMultiplierAttribute());
             }
             double hsCombined = hsGlobal * hsType;
             if (hsCombined != 1.0) {
@@ -79,7 +80,7 @@ public class GunDamageModifier {
         }
     }
 
-    private static double getAttributeValue(LivingEntity entity, Attribute attribute) {
+    private static double getAttributeValue(LivingEntity entity, Holder<Attribute> attribute) {
         if (entity.getAttributes().hasAttribute(attribute)) {
             return entity.getAttributeValue(attribute);
         }

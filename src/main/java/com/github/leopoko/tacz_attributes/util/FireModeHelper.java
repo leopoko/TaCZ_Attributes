@@ -7,7 +7,7 @@ import com.tacz.guns.api.item.gun.FireMode;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import javax.annotation.Nullable;
 
@@ -34,7 +34,7 @@ public final class FireModeHelper {
      * 射撃モードに対応する全体ダメージ属性を取得する。
      */
     @Nullable
-    public static RegistryObject<Attribute> getGlobalDamageAttribute(@Nullable FireMode mode) {
+    public static DeferredHolder<Attribute, Attribute> getGlobalDamageAttribute(@Nullable FireMode mode) {
         if (mode == null) return null;
         return switch (mode) {
             case AUTO -> CustomAttributes.AUTO_DAMAGE;
@@ -48,7 +48,7 @@ public final class FireModeHelper {
      * 射撃モードに対応する全体精度属性を取得する。
      */
     @Nullable
-    public static RegistryObject<Attribute> getGlobalAccuracyAttribute(@Nullable FireMode mode) {
+    public static DeferredHolder<Attribute, Attribute> getGlobalAccuracyAttribute(@Nullable FireMode mode) {
         if (mode == null) return null;
         return switch (mode) {
             case AUTO -> CustomAttributes.AUTO_ACCURACY;
@@ -62,7 +62,7 @@ public final class FireModeHelper {
      * 射撃モードに対応する銃種別ダメージ属性を取得する。
      */
     @Nullable
-    public static RegistryObject<Attribute> getTypeDamageAttribute(@Nullable GunType gunType, @Nullable FireMode mode) {
+    public static DeferredHolder<Attribute, Attribute> getTypeDamageAttribute(@Nullable GunType gunType, @Nullable FireMode mode) {
         if (gunType == null || mode == null) return null;
         return switch (mode) {
             case AUTO -> gunType.getAutoDamageAttribute();
@@ -76,7 +76,7 @@ public final class FireModeHelper {
      * 射撃モードに対応する銃種別精度属性を取得する。
      */
     @Nullable
-    public static RegistryObject<Attribute> getTypeAccuracyAttribute(@Nullable GunType gunType, @Nullable FireMode mode) {
+    public static DeferredHolder<Attribute, Attribute> getTypeAccuracyAttribute(@Nullable GunType gunType, @Nullable FireMode mode) {
         if (gunType == null || mode == null) return null;
         return switch (mode) {
             case AUTO -> gunType.getAutoAccuracyAttribute();
@@ -89,11 +89,10 @@ public final class FireModeHelper {
     /**
      * エンティティから属性値を取得する。属性が未登録の場合は 1.0 を返す。
      */
-    public static double getAttributeValue(LivingEntity entity, @Nullable RegistryObject<Attribute> attribute) {
+    public static double getAttributeValue(LivingEntity entity, @Nullable DeferredHolder<Attribute, Attribute> attribute) {
         if (attribute == null) return 1.0;
-        Attribute attr = attribute.get();
-        if (entity.getAttributes().hasAttribute(attr)) {
-            return entity.getAttributeValue(attr);
+        if (entity.getAttributes().hasAttribute(attribute)) {
+            return entity.getAttributeValue(attribute);
         }
         return 1.0;
     }

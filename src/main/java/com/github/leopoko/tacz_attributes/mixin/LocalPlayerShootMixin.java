@@ -7,6 +7,7 @@ import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.client.gameplay.LocalPlayerShoot;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -52,10 +53,10 @@ public class LocalPlayerShootMixin {
         if (mode != FireMode.BURST) return cycles;
 
         GunType gunType = GunTypeResolver.resolveFromItem(stack);
-        double globalMult = tacz_attributes$getAttrValue(CustomAttributes.BURST_BULLET_AMOUNT.get());
+        double globalMult = tacz_attributes$getAttrValue(CustomAttributes.BURST_BULLET_AMOUNT);
         double typeMult = 1.0;
         if (gunType != null) {
-            typeMult = tacz_attributes$getAttrValue(gunType.getBurstBulletAmountAttribute().get());
+            typeMult = tacz_attributes$getAttrValue(gunType.getBurstBulletAmountAttribute());
         }
         double combined = globalMult * typeMult;
         if (combined == 1.0) return cycles;
@@ -88,10 +89,10 @@ public class LocalPlayerShootMixin {
         if (mode != FireMode.BURST) return interval;
 
         GunType gunType = GunTypeResolver.resolveFromItem(stack);
-        double globalMult = tacz_attributes$getAttrValue(CustomAttributes.BURST_SPEED.get());
+        double globalMult = tacz_attributes$getAttrValue(CustomAttributes.BURST_SPEED);
         double typeMult = 1.0;
         if (gunType != null) {
-            typeMult = tacz_attributes$getAttrValue(gunType.getBurstSpeedAttribute().get());
+            typeMult = tacz_attributes$getAttrValue(gunType.getBurstSpeedAttribute());
         }
         double combined = globalMult * typeMult;
         if (combined == 1.0) return interval;
@@ -102,7 +103,7 @@ public class LocalPlayerShootMixin {
     }
 
     @Unique
-    private double tacz_attributes$getAttrValue(Attribute attribute) {
+    private double tacz_attributes$getAttrValue(Holder<Attribute> attribute) {
         if (this.player != null && this.player.getAttributes().hasAttribute(attribute)) {
             return this.player.getAttributeValue(attribute);
         }

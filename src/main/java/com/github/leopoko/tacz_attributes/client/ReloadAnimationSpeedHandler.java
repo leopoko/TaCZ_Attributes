@@ -16,12 +16,11 @@ import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.client.resource.GunDisplayInstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 import java.util.List;
 
@@ -34,7 +33,7 @@ import java.util.List;
  *    MAIN_TRACKのアニメーションランナーに設定
  * 3. どちらも終了した時に速度倍率をリセット
  */
-@Mod.EventBusSubscriber(modid = Tacz_attributes.MODID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = Tacz_attributes.MODID, value = Dist.CLIENT)
 public class ReloadAnimationSpeedHandler {
 
     /**
@@ -49,9 +48,7 @@ public class ReloadAnimationSpeedHandler {
     private static boolean wasSpeedModified = false;
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.START) return;
-
+    public static void onClientTick(ClientTickEvent.Post event) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return;
 
@@ -82,8 +79,8 @@ public class ReloadAnimationSpeedHandler {
     private static double getReloadSpeedModifier(LocalPlayer player) {
         // 全体リロード速度倍率
         double globalSpeed = 1.0;
-        if (player.getAttributes().hasAttribute(CustomAttributes.RELOAD_SPEED.get())) {
-            globalSpeed = player.getAttributeValue(CustomAttributes.RELOAD_SPEED.get());
+        if (player.getAttributes().hasAttribute(CustomAttributes.RELOAD_SPEED)) {
+            globalSpeed = player.getAttributeValue(CustomAttributes.RELOAD_SPEED);
         }
 
         // 銃種別リロード速度倍率
@@ -91,7 +88,7 @@ public class ReloadAnimationSpeedHandler {
         ItemStack mainHand = player.getMainHandItem();
         GunType gunType = GunTypeResolver.resolveFromItem(mainHand);
         if (gunType != null) {
-            Attribute typeAttr = gunType.getReloadSpeedAttribute().get();
+            var typeAttr = gunType.getReloadSpeedAttribute();
             if (player.getAttributes().hasAttribute(typeAttr)) {
                 typeSpeed = player.getAttributeValue(typeAttr);
             }
@@ -103,8 +100,8 @@ public class ReloadAnimationSpeedHandler {
     private static double getBoltSpeedModifier(LocalPlayer player) {
         // 全体コッキング速度倍率
         double globalSpeed = 1.0;
-        if (player.getAttributes().hasAttribute(CustomAttributes.BOLT_ACTION_SPEED.get())) {
-            globalSpeed = player.getAttributeValue(CustomAttributes.BOLT_ACTION_SPEED.get());
+        if (player.getAttributes().hasAttribute(CustomAttributes.BOLT_ACTION_SPEED)) {
+            globalSpeed = player.getAttributeValue(CustomAttributes.BOLT_ACTION_SPEED);
         }
 
         // 銃種別コッキング速度倍率
@@ -112,7 +109,7 @@ public class ReloadAnimationSpeedHandler {
         ItemStack mainHand = player.getMainHandItem();
         GunType gunType = GunTypeResolver.resolveFromItem(mainHand);
         if (gunType != null) {
-            Attribute typeAttr = gunType.getBoltActionSpeedAttribute().get();
+            var typeAttr = gunType.getBoltActionSpeedAttribute();
             if (player.getAttributes().hasAttribute(typeAttr)) {
                 typeSpeed = player.getAttributeValue(typeAttr);
             }

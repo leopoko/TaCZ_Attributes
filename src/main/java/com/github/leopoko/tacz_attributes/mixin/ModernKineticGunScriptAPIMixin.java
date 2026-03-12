@@ -9,6 +9,7 @@ import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.item.ModernKineticGunScriptAPI;
 import com.tacz.guns.util.AttachmentDataUtils;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.ItemStack;
@@ -103,14 +104,14 @@ public class ModernKineticGunScriptAPIMixin {
     @Unique
     private double tacz_attributes$getAmmoSaveChance() {
         double globalChance = 0.0;
-        if (shooter.getAttributes().hasAttribute(CustomAttributes.AMMO_SAVE_CHANCE.get())) {
-            globalChance = shooter.getAttributeValue(CustomAttributes.AMMO_SAVE_CHANCE.get());
+        if (shooter.getAttributes().hasAttribute(CustomAttributes.AMMO_SAVE_CHANCE)) {
+            globalChance = shooter.getAttributeValue(CustomAttributes.AMMO_SAVE_CHANCE);
         }
 
         double typeChance = 0.0;
         GunType gunType = GunTypeResolver.resolveFromItem(itemStack);
         if (gunType != null) {
-            Attribute typeAttr = gunType.getAmmoSaveChanceAttribute().get();
+            var typeAttr = gunType.getAmmoSaveChanceAttribute();
             if (shooter.getAttributes().hasAttribute(typeAttr)) {
                 typeChance = shooter.getAttributeValue(typeAttr);
             }
@@ -122,14 +123,14 @@ public class ModernKineticGunScriptAPIMixin {
     @Unique
     private double tacz_attributes$getReloadAmmoSaveChance() {
         double globalChance = 0.0;
-        if (shooter.getAttributes().hasAttribute(CustomAttributes.RELOAD_AMMO_SAVE_CHANCE.get())) {
-            globalChance = shooter.getAttributeValue(CustomAttributes.RELOAD_AMMO_SAVE_CHANCE.get());
+        if (shooter.getAttributes().hasAttribute(CustomAttributes.RELOAD_AMMO_SAVE_CHANCE)) {
+            globalChance = shooter.getAttributeValue(CustomAttributes.RELOAD_AMMO_SAVE_CHANCE);
         }
 
         double typeChance = 0.0;
         GunType gunType = GunTypeResolver.resolveFromItem(itemStack);
         if (gunType != null) {
-            Attribute typeAttr = gunType.getReloadAmmoSaveChanceAttribute().get();
+            var typeAttr = gunType.getReloadAmmoSaveChanceAttribute();
             if (shooter.getAttributes().hasAttribute(typeAttr)) {
                 typeChance = shooter.getAttributeValue(typeAttr);
             }
@@ -141,14 +142,14 @@ public class ModernKineticGunScriptAPIMixin {
     @Unique
     private double tacz_attributes$getBonusAmmoChance() {
         double globalChance = 0.0;
-        if (shooter.getAttributes().hasAttribute(CustomAttributes.BONUS_AMMO_CHANCE.get())) {
-            globalChance = shooter.getAttributeValue(CustomAttributes.BONUS_AMMO_CHANCE.get());
+        if (shooter.getAttributes().hasAttribute(CustomAttributes.BONUS_AMMO_CHANCE)) {
+            globalChance = shooter.getAttributeValue(CustomAttributes.BONUS_AMMO_CHANCE);
         }
 
         double typeChance = 0.0;
         GunType gunType = GunTypeResolver.resolveFromItem(itemStack);
         if (gunType != null) {
-            Attribute typeAttr = gunType.getBonusAmmoChanceAttribute().get();
+            var typeAttr = gunType.getBonusAmmoChanceAttribute();
             if (shooter.getAttributes().hasAttribute(typeAttr)) {
                 typeChance = shooter.getAttributeValue(typeAttr);
             }
@@ -163,13 +164,13 @@ public class ModernKineticGunScriptAPIMixin {
 
         // 固定数（全体 + 銃種別）
         double fixedAmount = tacz_attributes$getAttributeSum(
-                CustomAttributes.BONUS_AMMO_AMOUNT.get(),
-                gunType != null ? gunType.getBonusAmmoAmountAttribute().get() : null);
+                CustomAttributes.BONUS_AMMO_AMOUNT,
+                gunType != null ? gunType.getBonusAmmoAmountAttribute() : null);
 
         // 割合（全体 + 銃種別、上限 1.0）
         double percent = Math.min(1.0, tacz_attributes$getAttributeSum(
-                CustomAttributes.BONUS_AMMO_PERCENT.get(),
-                gunType != null ? gunType.getBonusAmmoPercentAttribute().get() : null));
+                CustomAttributes.BONUS_AMMO_PERCENT,
+                gunType != null ? gunType.getBonusAmmoPercentAttribute() : null));
 
         // マガジン最大容量
         int maxAmmo = tacz_attributes$getMaxAmmo();
@@ -178,7 +179,7 @@ public class ModernKineticGunScriptAPIMixin {
     }
 
     @Unique
-    private double tacz_attributes$getAttributeSum(Attribute globalAttr, Attribute typeAttr) {
+    private double tacz_attributes$getAttributeSum(Holder<Attribute> globalAttr, Holder<Attribute> typeAttr) {
         double global = 0.0;
         if (shooter.getAttributes().hasAttribute(globalAttr)) {
             global = shooter.getAttributeValue(globalAttr);

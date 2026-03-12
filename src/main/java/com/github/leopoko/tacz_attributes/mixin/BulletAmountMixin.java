@@ -6,6 +6,7 @@ import com.github.leopoko.tacz_attributes.util.GunTypeResolver;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.item.ModernKineticGunScriptAPI;
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.ItemStack;
@@ -51,11 +52,11 @@ public class BulletAmountMixin {
         if (iGun == null) return bulletAmount;
         FireMode mode = iGun.getFireMode(this.itemStack);
 
-        Attribute globalAttr;
+        Holder<Attribute> globalAttr;
         if (mode == FireMode.SEMI) {
-            globalAttr = CustomAttributes.SEMI_BULLET_AMOUNT.get();
+            globalAttr = CustomAttributes.SEMI_BULLET_AMOUNT;
         } else if (mode == FireMode.AUTO) {
-            globalAttr = CustomAttributes.AUTO_BULLET_AMOUNT.get();
+            globalAttr = CustomAttributes.AUTO_BULLET_AMOUNT;
         } else {
             return bulletAmount; // BURST時はcyclesで変更するためここでは変更しない
         }
@@ -64,9 +65,9 @@ public class BulletAmountMixin {
         double globalMult = tacz_attributes$getAttributeValue(this.shooter, globalAttr);
         double typeMult = 1.0;
         if (gunType != null) {
-            Attribute typeAttr = (mode == FireMode.SEMI)
-                    ? gunType.getSemiBulletAmountAttribute().get()
-                    : gunType.getAutoBulletAmountAttribute().get();
+            var typeAttr = (mode == FireMode.SEMI)
+                    ? gunType.getSemiBulletAmountAttribute()
+                    : gunType.getAutoBulletAmountAttribute();
             typeMult = tacz_attributes$getAttributeValue(this.shooter, typeAttr);
         }
         double combined = globalMult * typeMult;
@@ -91,10 +92,10 @@ public class BulletAmountMixin {
         if (this.shooter == null || cycles <= 1) return cycles; // 非バースト(cycles=1)は変更しない
 
         GunType gunType = GunTypeResolver.resolveFromItem(this.itemStack);
-        double globalMult = tacz_attributes$getAttributeValue(this.shooter, CustomAttributes.BURST_BULLET_AMOUNT.get());
+        double globalMult = tacz_attributes$getAttributeValue(this.shooter, CustomAttributes.BURST_BULLET_AMOUNT);
         double typeMult = 1.0;
         if (gunType != null) {
-            typeMult = tacz_attributes$getAttributeValue(this.shooter, gunType.getBurstBulletAmountAttribute().get());
+            typeMult = tacz_attributes$getAttributeValue(this.shooter, gunType.getBurstBulletAmountAttribute());
         }
         double combined = globalMult * typeMult;
         if (combined == 1.0) return cycles;
@@ -126,10 +127,10 @@ public class BulletAmountMixin {
         if (mode != FireMode.BURST) return interval;
 
         GunType gunType = GunTypeResolver.resolveFromItem(this.itemStack);
-        double globalMult = tacz_attributes$getAttributeValue(this.shooter, CustomAttributes.BURST_SPEED.get());
+        double globalMult = tacz_attributes$getAttributeValue(this.shooter, CustomAttributes.BURST_SPEED);
         double typeMult = 1.0;
         if (gunType != null) {
-            typeMult = tacz_attributes$getAttributeValue(this.shooter, gunType.getBurstSpeedAttribute().get());
+            typeMult = tacz_attributes$getAttributeValue(this.shooter, gunType.getBurstSpeedAttribute());
         }
         double combined = globalMult * typeMult;
         if (combined == 1.0) return interval;
@@ -140,7 +141,7 @@ public class BulletAmountMixin {
     }
 
     @Unique
-    private static double tacz_attributes$getAttributeValue(LivingEntity entity, Attribute attribute) {
+    private static double tacz_attributes$getAttributeValue(LivingEntity entity, Holder<Attribute> attribute) {
         if (entity.getAttributes().hasAttribute(attribute)) {
             return entity.getAttributeValue(attribute);
         }

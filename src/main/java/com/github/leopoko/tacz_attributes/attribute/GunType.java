@@ -2,8 +2,8 @@ package com.github.leopoko.tacz_attributes.attribute;
 
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.RangedAttribute;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -24,49 +24,49 @@ public enum GunType {
     MG("mg");
 
     private final String typeId;
-    private RegistryObject<Attribute> damageAttribute;
-    private RegistryObject<Attribute> reloadSpeedAttribute;
-    private RegistryObject<Attribute> boltActionSpeedAttribute;
-    private RegistryObject<Attribute> magazineCapacityAttribute;
-    private RegistryObject<Attribute> ammoSaveChanceAttribute;
-    private RegistryObject<Attribute> ammoRecoveryChanceAttribute;
-    private RegistryObject<Attribute> ammoRecoveryAmountAttribute;
-    private RegistryObject<Attribute> ammoRecoveryPercentAttribute;
-    private RegistryObject<Attribute> reloadAmmoSaveChanceAttribute;
-    private RegistryObject<Attribute> bonusAmmoChanceAttribute;
-    private RegistryObject<Attribute> bonusAmmoAmountAttribute;
-    private RegistryObject<Attribute> bonusAmmoPercentAttribute;
-    private RegistryObject<Attribute> hipFireAccuracyAttribute;
-    private RegistryObject<Attribute> adsAccuracyAttribute;
-    private RegistryObject<Attribute> hipFireDamageAttribute;
-    private RegistryObject<Attribute> adsDamageAttribute;
-    private RegistryObject<Attribute> autoDamageAttribute;
-    private RegistryObject<Attribute> semiDamageAttribute;
-    private RegistryObject<Attribute> burstDamageAttribute;
-    private RegistryObject<Attribute> autoAccuracyAttribute;
-    private RegistryObject<Attribute> semiAccuracyAttribute;
-    private RegistryObject<Attribute> burstAccuracyAttribute;
-    private RegistryObject<Attribute> recoilAttribute;
-    private RegistryObject<Attribute> verticalRecoilAttribute;
-    private RegistryObject<Attribute> horizontalRecoilAttribute;
-    private RegistryObject<Attribute> adsRecoilAttribute;
-    private RegistryObject<Attribute> adsVerticalRecoilAttribute;
-    private RegistryObject<Attribute> adsHorizontalRecoilAttribute;
-    private RegistryObject<Attribute> hipFireRecoilAttribute;
-    private RegistryObject<Attribute> hipFireVerticalRecoilAttribute;
-    private RegistryObject<Attribute> hipFireHorizontalRecoilAttribute;
-    private RegistryObject<Attribute> gunMovementSpeedAttribute;
-    private RegistryObject<Attribute> headshotMultiplierAttribute;
-    private RegistryObject<Attribute> knockbackMultiplierAttribute;
-    private RegistryObject<Attribute> knockbackBaseAttribute;
-    private RegistryObject<Attribute> pierceMultiplierAttribute;
-    private RegistryObject<Attribute> rpmMultiplierAttribute;
-    private RegistryObject<Attribute> adsSpeedAttribute;
-    private RegistryObject<Attribute> semiBulletAmountAttribute;
-    private RegistryObject<Attribute> autoBulletAmountAttribute;
-    private RegistryObject<Attribute> burstBulletAmountAttribute;
-    private RegistryObject<Attribute> drawSpeedAttribute;
-    private RegistryObject<Attribute> burstSpeedAttribute;
+    private DeferredHolder<Attribute, Attribute> damageAttribute;
+    private DeferredHolder<Attribute, Attribute> reloadSpeedAttribute;
+    private DeferredHolder<Attribute, Attribute> boltActionSpeedAttribute;
+    private DeferredHolder<Attribute, Attribute> magazineCapacityAttribute;
+    private DeferredHolder<Attribute, Attribute> ammoSaveChanceAttribute;
+    private DeferredHolder<Attribute, Attribute> ammoRecoveryChanceAttribute;
+    private DeferredHolder<Attribute, Attribute> ammoRecoveryAmountAttribute;
+    private DeferredHolder<Attribute, Attribute> ammoRecoveryPercentAttribute;
+    private DeferredHolder<Attribute, Attribute> reloadAmmoSaveChanceAttribute;
+    private DeferredHolder<Attribute, Attribute> bonusAmmoChanceAttribute;
+    private DeferredHolder<Attribute, Attribute> bonusAmmoAmountAttribute;
+    private DeferredHolder<Attribute, Attribute> bonusAmmoPercentAttribute;
+    private DeferredHolder<Attribute, Attribute> hipFireAccuracyAttribute;
+    private DeferredHolder<Attribute, Attribute> adsAccuracyAttribute;
+    private DeferredHolder<Attribute, Attribute> hipFireDamageAttribute;
+    private DeferredHolder<Attribute, Attribute> adsDamageAttribute;
+    private DeferredHolder<Attribute, Attribute> autoDamageAttribute;
+    private DeferredHolder<Attribute, Attribute> semiDamageAttribute;
+    private DeferredHolder<Attribute, Attribute> burstDamageAttribute;
+    private DeferredHolder<Attribute, Attribute> autoAccuracyAttribute;
+    private DeferredHolder<Attribute, Attribute> semiAccuracyAttribute;
+    private DeferredHolder<Attribute, Attribute> burstAccuracyAttribute;
+    private DeferredHolder<Attribute, Attribute> recoilAttribute;
+    private DeferredHolder<Attribute, Attribute> verticalRecoilAttribute;
+    private DeferredHolder<Attribute, Attribute> horizontalRecoilAttribute;
+    private DeferredHolder<Attribute, Attribute> adsRecoilAttribute;
+    private DeferredHolder<Attribute, Attribute> adsVerticalRecoilAttribute;
+    private DeferredHolder<Attribute, Attribute> adsHorizontalRecoilAttribute;
+    private DeferredHolder<Attribute, Attribute> hipFireRecoilAttribute;
+    private DeferredHolder<Attribute, Attribute> hipFireVerticalRecoilAttribute;
+    private DeferredHolder<Attribute, Attribute> hipFireHorizontalRecoilAttribute;
+    private DeferredHolder<Attribute, Attribute> gunMovementSpeedAttribute;
+    private DeferredHolder<Attribute, Attribute> headshotMultiplierAttribute;
+    private DeferredHolder<Attribute, Attribute> knockbackMultiplierAttribute;
+    private DeferredHolder<Attribute, Attribute> knockbackBaseAttribute;
+    private DeferredHolder<Attribute, Attribute> pierceMultiplierAttribute;
+    private DeferredHolder<Attribute, Attribute> rpmMultiplierAttribute;
+    private DeferredHolder<Attribute, Attribute> adsSpeedAttribute;
+    private DeferredHolder<Attribute, Attribute> semiBulletAmountAttribute;
+    private DeferredHolder<Attribute, Attribute> autoBulletAmountAttribute;
+    private DeferredHolder<Attribute, Attribute> burstBulletAmountAttribute;
+    private DeferredHolder<Attribute, Attribute> drawSpeedAttribute;
+    private DeferredHolder<Attribute, Attribute> burstSpeedAttribute;
 
     private static final Map<String, GunType> BY_TYPE_ID = new HashMap<>();
 
@@ -84,175 +84,175 @@ public enum GunType {
         return typeId;
     }
 
-    public RegistryObject<Attribute> getDamageAttribute() {
+    public DeferredHolder<Attribute, Attribute> getDamageAttribute() {
         return damageAttribute;
     }
 
-    public RegistryObject<Attribute> getReloadSpeedAttribute() {
+    public DeferredHolder<Attribute, Attribute> getReloadSpeedAttribute() {
         return reloadSpeedAttribute;
     }
 
-    public RegistryObject<Attribute> getBoltActionSpeedAttribute() {
+    public DeferredHolder<Attribute, Attribute> getBoltActionSpeedAttribute() {
         return boltActionSpeedAttribute;
     }
 
-    public RegistryObject<Attribute> getMagazineCapacityAttribute() {
+    public DeferredHolder<Attribute, Attribute> getMagazineCapacityAttribute() {
         return magazineCapacityAttribute;
     }
 
-    public RegistryObject<Attribute> getAmmoSaveChanceAttribute() {
+    public DeferredHolder<Attribute, Attribute> getAmmoSaveChanceAttribute() {
         return ammoSaveChanceAttribute;
     }
 
-    public RegistryObject<Attribute> getAmmoRecoveryChanceAttribute() {
+    public DeferredHolder<Attribute, Attribute> getAmmoRecoveryChanceAttribute() {
         return ammoRecoveryChanceAttribute;
     }
 
-    public RegistryObject<Attribute> getAmmoRecoveryAmountAttribute() {
+    public DeferredHolder<Attribute, Attribute> getAmmoRecoveryAmountAttribute() {
         return ammoRecoveryAmountAttribute;
     }
 
-    public RegistryObject<Attribute> getAmmoRecoveryPercentAttribute() {
+    public DeferredHolder<Attribute, Attribute> getAmmoRecoveryPercentAttribute() {
         return ammoRecoveryPercentAttribute;
     }
 
-    public RegistryObject<Attribute> getReloadAmmoSaveChanceAttribute() {
+    public DeferredHolder<Attribute, Attribute> getReloadAmmoSaveChanceAttribute() {
         return reloadAmmoSaveChanceAttribute;
     }
 
-    public RegistryObject<Attribute> getBonusAmmoChanceAttribute() {
+    public DeferredHolder<Attribute, Attribute> getBonusAmmoChanceAttribute() {
         return bonusAmmoChanceAttribute;
     }
 
-    public RegistryObject<Attribute> getBonusAmmoAmountAttribute() {
+    public DeferredHolder<Attribute, Attribute> getBonusAmmoAmountAttribute() {
         return bonusAmmoAmountAttribute;
     }
 
-    public RegistryObject<Attribute> getBonusAmmoPercentAttribute() {
+    public DeferredHolder<Attribute, Attribute> getBonusAmmoPercentAttribute() {
         return bonusAmmoPercentAttribute;
     }
 
-    public RegistryObject<Attribute> getHipFireAccuracyAttribute() {
+    public DeferredHolder<Attribute, Attribute> getHipFireAccuracyAttribute() {
         return hipFireAccuracyAttribute;
     }
 
-    public RegistryObject<Attribute> getAdsAccuracyAttribute() {
+    public DeferredHolder<Attribute, Attribute> getAdsAccuracyAttribute() {
         return adsAccuracyAttribute;
     }
 
-    public RegistryObject<Attribute> getHipFireDamageAttribute() {
+    public DeferredHolder<Attribute, Attribute> getHipFireDamageAttribute() {
         return hipFireDamageAttribute;
     }
 
-    public RegistryObject<Attribute> getAdsDamageAttribute() {
+    public DeferredHolder<Attribute, Attribute> getAdsDamageAttribute() {
         return adsDamageAttribute;
     }
 
-    public RegistryObject<Attribute> getAutoDamageAttribute() {
+    public DeferredHolder<Attribute, Attribute> getAutoDamageAttribute() {
         return autoDamageAttribute;
     }
 
-    public RegistryObject<Attribute> getSemiDamageAttribute() {
+    public DeferredHolder<Attribute, Attribute> getSemiDamageAttribute() {
         return semiDamageAttribute;
     }
 
-    public RegistryObject<Attribute> getBurstDamageAttribute() {
+    public DeferredHolder<Attribute, Attribute> getBurstDamageAttribute() {
         return burstDamageAttribute;
     }
 
-    public RegistryObject<Attribute> getAutoAccuracyAttribute() {
+    public DeferredHolder<Attribute, Attribute> getAutoAccuracyAttribute() {
         return autoAccuracyAttribute;
     }
 
-    public RegistryObject<Attribute> getSemiAccuracyAttribute() {
+    public DeferredHolder<Attribute, Attribute> getSemiAccuracyAttribute() {
         return semiAccuracyAttribute;
     }
 
-    public RegistryObject<Attribute> getBurstAccuracyAttribute() {
+    public DeferredHolder<Attribute, Attribute> getBurstAccuracyAttribute() {
         return burstAccuracyAttribute;
     }
 
-    public RegistryObject<Attribute> getRecoilAttribute() {
+    public DeferredHolder<Attribute, Attribute> getRecoilAttribute() {
         return recoilAttribute;
     }
 
-    public RegistryObject<Attribute> getVerticalRecoilAttribute() {
+    public DeferredHolder<Attribute, Attribute> getVerticalRecoilAttribute() {
         return verticalRecoilAttribute;
     }
 
-    public RegistryObject<Attribute> getHorizontalRecoilAttribute() {
+    public DeferredHolder<Attribute, Attribute> getHorizontalRecoilAttribute() {
         return horizontalRecoilAttribute;
     }
 
-    public RegistryObject<Attribute> getAdsRecoilAttribute() {
+    public DeferredHolder<Attribute, Attribute> getAdsRecoilAttribute() {
         return adsRecoilAttribute;
     }
 
-    public RegistryObject<Attribute> getAdsVerticalRecoilAttribute() {
+    public DeferredHolder<Attribute, Attribute> getAdsVerticalRecoilAttribute() {
         return adsVerticalRecoilAttribute;
     }
 
-    public RegistryObject<Attribute> getAdsHorizontalRecoilAttribute() {
+    public DeferredHolder<Attribute, Attribute> getAdsHorizontalRecoilAttribute() {
         return adsHorizontalRecoilAttribute;
     }
 
-    public RegistryObject<Attribute> getHipFireRecoilAttribute() {
+    public DeferredHolder<Attribute, Attribute> getHipFireRecoilAttribute() {
         return hipFireRecoilAttribute;
     }
 
-    public RegistryObject<Attribute> getHipFireVerticalRecoilAttribute() {
+    public DeferredHolder<Attribute, Attribute> getHipFireVerticalRecoilAttribute() {
         return hipFireVerticalRecoilAttribute;
     }
 
-    public RegistryObject<Attribute> getHipFireHorizontalRecoilAttribute() {
+    public DeferredHolder<Attribute, Attribute> getHipFireHorizontalRecoilAttribute() {
         return hipFireHorizontalRecoilAttribute;
     }
 
-    public RegistryObject<Attribute> getGunMovementSpeedAttribute() {
+    public DeferredHolder<Attribute, Attribute> getGunMovementSpeedAttribute() {
         return gunMovementSpeedAttribute;
     }
 
-    public RegistryObject<Attribute> getHeadshotMultiplierAttribute() {
+    public DeferredHolder<Attribute, Attribute> getHeadshotMultiplierAttribute() {
         return headshotMultiplierAttribute;
     }
 
-    public RegistryObject<Attribute> getKnockbackMultiplierAttribute() {
+    public DeferredHolder<Attribute, Attribute> getKnockbackMultiplierAttribute() {
         return knockbackMultiplierAttribute;
     }
 
-    public RegistryObject<Attribute> getKnockbackBaseAttribute() {
+    public DeferredHolder<Attribute, Attribute> getKnockbackBaseAttribute() {
         return knockbackBaseAttribute;
     }
 
-    public RegistryObject<Attribute> getPierceMultiplierAttribute() {
+    public DeferredHolder<Attribute, Attribute> getPierceMultiplierAttribute() {
         return pierceMultiplierAttribute;
     }
 
-    public RegistryObject<Attribute> getRpmMultiplierAttribute() {
+    public DeferredHolder<Attribute, Attribute> getRpmMultiplierAttribute() {
         return rpmMultiplierAttribute;
     }
 
-    public RegistryObject<Attribute> getAdsSpeedAttribute() {
+    public DeferredHolder<Attribute, Attribute> getAdsSpeedAttribute() {
         return adsSpeedAttribute;
     }
 
-    public RegistryObject<Attribute> getSemiBulletAmountAttribute() {
+    public DeferredHolder<Attribute, Attribute> getSemiBulletAmountAttribute() {
         return semiBulletAmountAttribute;
     }
 
-    public RegistryObject<Attribute> getAutoBulletAmountAttribute() {
+    public DeferredHolder<Attribute, Attribute> getAutoBulletAmountAttribute() {
         return autoBulletAmountAttribute;
     }
 
-    public RegistryObject<Attribute> getBurstBulletAmountAttribute() {
+    public DeferredHolder<Attribute, Attribute> getBurstBulletAmountAttribute() {
         return burstBulletAmountAttribute;
     }
 
-    public RegistryObject<Attribute> getDrawSpeedAttribute() {
+    public DeferredHolder<Attribute, Attribute> getDrawSpeedAttribute() {
         return drawSpeedAttribute;
     }
 
-    public RegistryObject<Attribute> getBurstSpeedAttribute() {
+    public DeferredHolder<Attribute, Attribute> getBurstSpeedAttribute() {
         return burstSpeedAttribute;
     }
 
@@ -319,53 +319,53 @@ public enum GunType {
         }
     }
 
-    private static RegistryObject<Attribute> registerDamage(DeferredRegister<Attribute> registry, String name) {
+    private static DeferredHolder<Attribute, Attribute> registerDamage(DeferredRegister<Attribute> registry, String name) {
         return registry.register(name,
-                () -> new RangedAttribute("attribute.tacz_attributes." + name, 1.0, 0.0, 1024.0).setSyncable(true));
+                () -> new RangedAttribute("attribute.tacz_attributes." + name, 1.0, 0.0, 1024.0));
     }
 
-    private static RegistryObject<Attribute> registerAccuracy(DeferredRegister<Attribute> registry, String name) {
+    private static DeferredHolder<Attribute, Attribute> registerAccuracy(DeferredRegister<Attribute> registry, String name) {
         return registry.register(name,
-                () -> new RangedAttribute("attribute.tacz_attributes." + name, 1.0, 0.01, 100.0).setSyncable(true));
+                () -> new RangedAttribute("attribute.tacz_attributes." + name, 1.0, 0.01, 100.0));
     }
 
-    private static RegistryObject<Attribute> registerReloadSpeed(DeferredRegister<Attribute> registry, String name) {
+    private static DeferredHolder<Attribute, Attribute> registerReloadSpeed(DeferredRegister<Attribute> registry, String name) {
         return registry.register(name,
-                () -> new RangedAttribute("attribute.tacz_attributes." + name, 1.0, 0.1, 20.0).setSyncable(true));
+                () -> new RangedAttribute("attribute.tacz_attributes." + name, 1.0, 0.1, 20.0));
     }
 
-    private static RegistryObject<Attribute> registerRecoil(DeferredRegister<Attribute> registry, String name) {
+    private static DeferredHolder<Attribute, Attribute> registerRecoil(DeferredRegister<Attribute> registry, String name) {
         return registry.register(name,
-                () -> new RangedAttribute("attribute.tacz_attributes." + name, 1.0, 0.0, 100.0).setSyncable(true));
+                () -> new RangedAttribute("attribute.tacz_attributes." + name, 1.0, 0.0, 100.0));
     }
 
-    private static RegistryObject<Attribute> registerGenericMultiplier(DeferredRegister<Attribute> registry, String name) {
+    private static DeferredHolder<Attribute, Attribute> registerGenericMultiplier(DeferredRegister<Attribute> registry, String name) {
         return registry.register(name,
-                () -> new RangedAttribute("attribute.tacz_attributes." + name, 1.0, 0.0, 100.0).setSyncable(true));
+                () -> new RangedAttribute("attribute.tacz_attributes." + name, 1.0, 0.0, 100.0));
     }
 
-    private static RegistryObject<Attribute> registerPierceMultiplier(DeferredRegister<Attribute> registry, String name) {
+    private static DeferredHolder<Attribute, Attribute> registerPierceMultiplier(DeferredRegister<Attribute> registry, String name) {
         return registry.register(name,
-                () -> new RangedAttribute("attribute.tacz_attributes." + name, 1.0, 0.01, 100.0).setSyncable(true));
+                () -> new RangedAttribute("attribute.tacz_attributes." + name, 1.0, 0.01, 100.0));
     }
 
-    private static RegistryObject<Attribute> registerSpeedMultiplier(DeferredRegister<Attribute> registry, String name) {
+    private static DeferredHolder<Attribute, Attribute> registerSpeedMultiplier(DeferredRegister<Attribute> registry, String name) {
         return registry.register(name,
-                () -> new RangedAttribute("attribute.tacz_attributes." + name, 1.0, 0.01, 10.0).setSyncable(true));
+                () -> new RangedAttribute("attribute.tacz_attributes." + name, 1.0, 0.01, 10.0));
     }
 
-    private static RegistryObject<Attribute> registerBulletAmount(DeferredRegister<Attribute> registry, String name) {
+    private static DeferredHolder<Attribute, Attribute> registerBulletAmount(DeferredRegister<Attribute> registry, String name) {
         return registry.register(name,
-                () -> new RangedAttribute("attribute.tacz_attributes." + name, 1.0, 0.01, 100.0).setSyncable(true));
+                () -> new RangedAttribute("attribute.tacz_attributes." + name, 1.0, 0.01, 100.0));
     }
 
-    private static RegistryObject<Attribute> registerKnockbackBase(DeferredRegister<Attribute> registry, String name) {
+    private static DeferredHolder<Attribute, Attribute> registerKnockbackBase(DeferredRegister<Attribute> registry, String name) {
         return registry.register(name,
-                () -> new RangedAttribute("attribute.tacz_attributes." + name, 0.0, 0.0, 100.0).setSyncable(true));
+                () -> new RangedAttribute("attribute.tacz_attributes." + name, 0.0, 0.0, 100.0));
     }
 
-    private static RegistryObject<Attribute> registerChance(DeferredRegister<Attribute> registry, String name) {
+    private static DeferredHolder<Attribute, Attribute> registerChance(DeferredRegister<Attribute> registry, String name) {
         return registry.register(name,
-                () -> new RangedAttribute("attribute.tacz_attributes." + name, 0.0, 0.0, 1.0).setSyncable(true));
+                () -> new RangedAttribute("attribute.tacz_attributes." + name, 0.0, 0.0, 1.0));
     }
 }

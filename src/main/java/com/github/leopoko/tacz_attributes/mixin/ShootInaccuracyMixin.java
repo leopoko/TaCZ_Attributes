@@ -7,6 +7,7 @@ import com.github.leopoko.tacz_attributes.util.GunTypeResolver;
 import com.tacz.guns.api.entity.IGunOperator;
 import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.item.ModernKineticGunScriptAPI;
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.ItemStack;
@@ -57,14 +58,14 @@ public class ShootInaccuracyMixin {
         double adsHipGlobal;
         double adsHipType = 1.0;
         if (isAds) {
-            adsHipGlobal = tacz_attributes$getAttributeValue(CustomAttributes.ADS_ACCURACY.get());
+            adsHipGlobal = tacz_attributes$getAttributeValue(CustomAttributes.ADS_ACCURACY);
             if (gunType != null) {
-                adsHipType = tacz_attributes$getAttributeValue(gunType.getAdsAccuracyAttribute().get());
+                adsHipType = tacz_attributes$getAttributeValue(gunType.getAdsAccuracyAttribute());
             }
         } else {
-            adsHipGlobal = tacz_attributes$getAttributeValue(CustomAttributes.HIP_FIRE_ACCURACY.get());
+            adsHipGlobal = tacz_attributes$getAttributeValue(CustomAttributes.HIP_FIRE_ACCURACY);
             if (gunType != null) {
-                adsHipType = tacz_attributes$getAttributeValue(gunType.getHipFireAccuracyAttribute().get());
+                adsHipType = tacz_attributes$getAttributeValue(gunType.getHipFireAccuracyAttribute());
             }
         }
 
@@ -82,7 +83,7 @@ public class ShootInaccuracyMixin {
     }
 
     @Unique
-    private double tacz_attributes$getAttributeValue(Attribute attribute) {
+    private double tacz_attributes$getAttributeValue(Holder<Attribute> attribute) {
         if (shooter.getAttributes().hasAttribute(attribute)) {
             return shooter.getAttributeValue(attribute);
         }

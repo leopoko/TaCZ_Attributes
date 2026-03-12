@@ -6,6 +6,7 @@ import com.github.leopoko.tacz_attributes.util.GunTypeResolver;
 import com.tacz.guns.client.renderer.item.GunItemRendererWrapper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -47,20 +48,20 @@ public class GunItemRendererWrapperMixin {
 
     @Unique
     private static double tacz_attributes$getDrawSpeedModifier(LocalPlayer player) {
-        double globalSpeed = tacz_attributes$getAttributeValue(player, CustomAttributes.DRAW_SPEED.get());
+        double globalSpeed = tacz_attributes$getAttributeValue(player, CustomAttributes.DRAW_SPEED);
 
         // 銃種は切り替え先の武器（メインハンド）で判定
         GunType gunType = GunTypeResolver.resolveFromItem(player.getMainHandItem());
         double typeSpeed = 1.0;
         if (gunType != null) {
-            typeSpeed = tacz_attributes$getAttributeValue(player, gunType.getDrawSpeedAttribute().get());
+            typeSpeed = tacz_attributes$getAttributeValue(player, gunType.getDrawSpeedAttribute());
         }
 
         return globalSpeed * typeSpeed;
     }
 
     @Unique
-    private static double tacz_attributes$getAttributeValue(LocalPlayer player, Attribute attribute) {
+    private static double tacz_attributes$getAttributeValue(LocalPlayer player, Holder<Attribute> attribute) {
         if (player.getAttributes().hasAttribute(attribute)) {
             return player.getAttributeValue(attribute);
         }

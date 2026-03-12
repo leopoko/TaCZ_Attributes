@@ -7,7 +7,6 @@ import com.github.leopoko.tacz_attributes.util.ShooterContext;
 import com.tacz.guns.entity.shooter.LivingEntityBolt;
 import com.tacz.guns.entity.shooter.ShooterDataHolder;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -87,8 +86,8 @@ public abstract class LivingEntityBoltMixin {
 
         // 全体コッキング速度倍率
         double globalSpeed = 1.0;
-        if (shooter.getAttributes().hasAttribute(CustomAttributes.BOLT_ACTION_SPEED.get())) {
-            globalSpeed = shooter.getAttributeValue(CustomAttributes.BOLT_ACTION_SPEED.get());
+        if (shooter.getAttributes().hasAttribute(CustomAttributes.BOLT_ACTION_SPEED)) {
+            globalSpeed = shooter.getAttributeValue(CustomAttributes.BOLT_ACTION_SPEED);
         }
 
         // 銃種別コッキング速度倍率
@@ -96,7 +95,7 @@ public abstract class LivingEntityBoltMixin {
         ItemStack mainHand = shooter.getMainHandItem();
         GunType gunType = GunTypeResolver.resolveFromItem(mainHand);
         if (gunType != null) {
-            Attribute typeAttr = gunType.getBoltActionSpeedAttribute().get();
+            var typeAttr = gunType.getBoltActionSpeedAttribute();
             if (shooter.getAttributes().hasAttribute(typeAttr)) {
                 typeSpeed = shooter.getAttributeValue(typeAttr);
             }

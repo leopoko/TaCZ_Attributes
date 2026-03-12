@@ -15,12 +15,13 @@ import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.client.resource.GunDisplayInstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 import java.util.List;
 
@@ -36,7 +37,7 @@ import java.util.List;
  * 2. draw状態中であればMAIN_TRACKのアニメーションランナーに速度倍率を設定
  * 3. draw終了時に速度倍率をリセット
  */
-@Mod.EventBusSubscriber(modid = Tacz_attributes.MODID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = Tacz_attributes.MODID, value = Dist.CLIENT)
 public class DrawAnimationSpeedHandler {
 
     /**
@@ -50,9 +51,7 @@ public class DrawAnimationSpeedHandler {
     private static boolean wasDrawing = false;
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.START) return;
-
+    public static void onClientTick(ClientTickEvent.Post event) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return;
 
@@ -73,14 +72,14 @@ public class DrawAnimationSpeedHandler {
     }
 
     private static double getDrawSpeedModifier(LocalPlayer player) {
-        double globalSpeed = getAttributeValue(player, CustomAttributes.DRAW_SPEED.get());
+        double globalSpeed = getAttributeValue(player, CustomAttributes.DRAW_SPEED);
 
         // 銃種は現在のメインハンド（新しい武器）で判定
         ItemStack mainHand = player.getMainHandItem();
         GunType gunType = GunTypeResolver.resolveFromItem(mainHand);
         double typeSpeed = 1.0;
         if (gunType != null) {
-            typeSpeed = getAttributeValue(player, gunType.getDrawSpeedAttribute().get());
+            typeSpeed = getAttributeValue(player, gunType.getDrawSpeedAttribute());
         }
 
         return globalSpeed * typeSpeed;
@@ -133,7 +132,7 @@ public class DrawAnimationSpeedHandler {
         }
     }
 
-    private static double getAttributeValue(LocalPlayer player, Attribute attribute) {
+    private static double getAttributeValue(LocalPlayer player, Holder<Attribute> attribute) {
         if (player.getAttributes().hasAttribute(attribute)) {
             return player.getAttributeValue(attribute);
         }

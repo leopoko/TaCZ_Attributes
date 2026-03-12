@@ -7,13 +7,14 @@ import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.event.common.EntityKillByGunEvent;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.util.AttachmentDataUtils;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 /**
  * キル時弾薬回復イベントハンドラ。
@@ -22,7 +23,7 @@ import net.minecraftforge.fml.common.Mod;
  * 回復量 = 固定数 + ceil(マガジン最大容量 × 割合)
  * マガジン最大容量を超えた回復も許可される。
  */
-@Mod.EventBusSubscriber(modid = Tacz_attributes.MODID)
+@EventBusSubscriber(modid = Tacz_attributes.MODID)
 public class GunKillAmmoRecovery {
 
     @SubscribeEvent
@@ -56,13 +57,13 @@ public class GunKillAmmoRecovery {
 
     private static double getAmmoRecoveryChance(LivingEntity attacker, GunType gunType) {
         double globalChance = 0.0;
-        if (attacker.getAttributes().hasAttribute(CustomAttributes.AMMO_RECOVERY_CHANCE.get())) {
-            globalChance = attacker.getAttributeValue(CustomAttributes.AMMO_RECOVERY_CHANCE.get());
+        if (attacker.getAttributes().hasAttribute(CustomAttributes.AMMO_RECOVERY_CHANCE)) {
+            globalChance = attacker.getAttributeValue(CustomAttributes.AMMO_RECOVERY_CHANCE);
         }
 
         double typeChance = 0.0;
         if (gunType != null) {
-            Attribute typeAttr = gunType.getAmmoRecoveryChanceAttribute().get();
+            var typeAttr = gunType.getAmmoRecoveryChanceAttribute();
             if (attacker.getAttributes().hasAttribute(typeAttr)) {
                 typeChance = attacker.getAttributeValue(typeAttr);
             }
@@ -74,13 +75,13 @@ public class GunKillAmmoRecovery {
     private static int calculateRecoveryAmount(LivingEntity attacker, ItemStack mainHand, GunType gunType) {
         // 固定数（全体 + 銃種別）
         double fixedAmount = getAttributeSum(attacker,
-                CustomAttributes.AMMO_RECOVERY_AMOUNT.get(),
-                gunType != null ? gunType.getAmmoRecoveryAmountAttribute().get() : null);
+                CustomAttributes.AMMO_RECOVERY_AMOUNT,
+                gunType != null ? gunType.getAmmoRecoveryAmountAttribute() : null);
 
         // 割合（全体 + 銃種別）
         double percent = Math.min(1.0, getAttributeSum(attacker,
-                CustomAttributes.AMMO_RECOVERY_PERCENT.get(),
-                gunType != null ? gunType.getAmmoRecoveryPercentAttribute().get() : null));
+                CustomAttributes.AMMO_RECOVERY_PERCENT,
+                gunType != null ? gunType.getAmmoRecoveryPercentAttribute() : null));
 
         // マガジン最大容量を取得
         int maxAmmo = getMaxAmmo(mainHand);
@@ -89,7 +90,7 @@ public class GunKillAmmoRecovery {
     }
 
     private static double getAttributeSum(LivingEntity entity,
-                                          Attribute globalAttr, Attribute typeAttr) {
+                                          Holder<Attribute> globalAttr, Holder<Attribute> typeAttr) {
         double global = 0.0;
         if (entity.getAttributes().hasAttribute(globalAttr)) {
             global = entity.getAttributeValue(globalAttr);

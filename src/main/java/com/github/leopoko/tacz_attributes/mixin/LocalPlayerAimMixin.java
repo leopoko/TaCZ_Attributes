@@ -5,6 +5,7 @@ import com.github.leopoko.tacz_attributes.attribute.GunType;
 import com.github.leopoko.tacz_attributes.util.GunTypeResolver;
 import com.tacz.guns.client.gameplay.LocalPlayerAim;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import org.spongepowered.asm.mixin.Final;
@@ -41,11 +42,11 @@ public class LocalPlayerAimMixin {
         float aimTime = Math.max(a, b);
         if (aimTime <= 0) return aimTime;
 
-        double globalAdsSpeed = tacz_attributes$getAttributeValue(this.player, CustomAttributes.ADS_SPEED.get());
+        double globalAdsSpeed = tacz_attributes$getAttributeValue(this.player, CustomAttributes.ADS_SPEED);
         GunType gunType = GunTypeResolver.resolveFromItem(this.player.getMainHandItem());
         double typeAdsSpeed = 1.0;
         if (gunType != null) {
-            typeAdsSpeed = tacz_attributes$getAttributeValue(this.player, gunType.getAdsSpeedAttribute().get());
+            typeAdsSpeed = tacz_attributes$getAttributeValue(this.player, gunType.getAdsSpeedAttribute());
         }
         double combined = globalAdsSpeed * typeAdsSpeed;
         if (combined == 1.0) return aimTime;
@@ -56,7 +57,7 @@ public class LocalPlayerAimMixin {
     }
 
     @Unique
-    private static double tacz_attributes$getAttributeValue(LivingEntity entity, Attribute attribute) {
+    private static double tacz_attributes$getAttributeValue(LivingEntity entity, Holder<Attribute> attribute) {
         if (entity.getAttributes().hasAttribute(attribute)) {
             return entity.getAttributeValue(attribute);
         }

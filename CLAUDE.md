@@ -322,6 +322,11 @@ src/main/java/com/github/leopoko/tacz_attributes/
 を実行する必要がある。これにより `.idea/runConfigurations/` にrun設定が生成される。
 この設定は `.gitignore` に含まれておりコミットされないため、各開発者がローカルで実行する。
 
+### バージョン更新手順
+1. `gradle.properties` の `mod_version` を新バージョンに変更（例: `1.2+1.21.1` → `1.3+1.21.1`）
+2. `CHANGELOG.md` の先頭に新バージョンのセクションを追加（`## [x.x]` 形式）
+3. ビルド確認: `./gradlew build`
+
 ## 開発上の注意
 
 - Mixin設定ファイル: `src/main/resources/tacz_attributes.mixins.json`

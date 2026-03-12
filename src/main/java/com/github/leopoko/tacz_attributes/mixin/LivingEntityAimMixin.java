@@ -6,9 +6,6 @@ import com.github.leopoko.tacz_attributes.util.GunTypeResolver;
 import com.tacz.guns.entity.shooter.LivingEntityAim;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -25,8 +22,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
  */
 @Mixin(LivingEntityAim.class)
 public class LivingEntityAimMixin {
-
-    private static final Logger LOGGER = LogManager.getLogger();
 
     @Shadow(remap = false)
     @Final
@@ -55,12 +50,6 @@ public class LivingEntityAimMixin {
         if (combined == 1.0) return aimTime;
 
         float modified = (float) (aimTime / combined);
-
-        if (!FMLEnvironment.production) {
-            LOGGER.info("[TaCZ Attributes] ADS速度倍率適用: aimTime {} -> {} (全体: {}, 銃種[{}]: {})",
-                    aimTime, modified, globalAdsSpeed,
-                    gunType != null ? gunType.getTypeId() : "unknown", typeAdsSpeed);
-        }
 
         return Math.max(0, modified);
     }

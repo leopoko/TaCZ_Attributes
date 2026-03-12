@@ -8,9 +8,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -28,8 +25,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(GunItemRendererWrapper.class)
 public class GunItemRendererWrapperMixin {
 
-    private static final Logger LOGGER = LogManager.getLogger();
-
     /**
      * getPutAwayTime() の戻り値をdraw_speed属性でスケーリングする。
      * 戻り値はミリ秒単位。
@@ -46,11 +41,6 @@ public class GunItemRendererWrapperMixin {
         if (speed == 1.0) return;
 
         long scaled = Math.max(1L, (long) (time / speed));
-
-        if (!FMLEnvironment.production) {
-            LOGGER.info("[TaCZ Attributes] クライアント側PutAway時間スケーリング: {}ms -> {}ms (速度: {})",
-                    time, scaled, speed);
-        }
 
         cir.setReturnValue(scaled);
     }

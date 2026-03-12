@@ -10,9 +10,6 @@ import com.tacz.guns.item.ModernKineticGunScriptAPI;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -33,8 +30,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
  */
 @Mixin(ModernKineticGunScriptAPI.class)
 public class ShootInaccuracyMixin {
-
-    private static final Logger LOGGER = LogManager.getLogger();
 
     @Shadow(remap = false)
     private LivingEntity shooter;
@@ -82,14 +77,6 @@ public class ShootInaccuracyMixin {
         if (combinedAccuracy == 1.0) return originalInaccuracy;
 
         float modifiedInaccuracy = (float) (originalInaccuracy / combinedAccuracy);
-
-        if (!FMLEnvironment.production) {
-            LOGGER.info("[TaCZ Attributes] 精度属性適用: inaccuracy {} -> {} (ADS: {}, 腰撃ち/ADS精度: {}×{}, モード[{}]精度: {}×{})",
-                    originalInaccuracy, modifiedInaccuracy, isAds,
-                    adsHipGlobal, adsHipType,
-                    fireMode != null ? fireMode.name() : "unknown",
-                    fireModeGlobal, fireModeType);
-        }
 
         return modifiedInaccuracy;
     }

@@ -21,9 +21,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
@@ -41,8 +38,6 @@ import java.util.List;
  */
 @Mod.EventBusSubscriber(modid = Tacz_attributes.MODID, value = Dist.CLIENT)
 public class DrawAnimationSpeedHandler {
-
-    private static final Logger LOGGER = LogManager.getLogger();
 
     /**
      * デフォルトステートマシンでのMAIN_TRACKの位置。
@@ -135,9 +130,6 @@ public class DrawAnimationSpeedHandler {
     private static void setSpeedOnRunner(ObjectAnimationRunner runner, float speed) {
         if (runner instanceof ISpeedModifiable modifiable) {
             modifiable.tacz_attributes$setSpeedMultiplier(speed);
-            if (!FMLEnvironment.production && speed != 1.0f) {
-                LOGGER.debug("[TaCZ Attributes] Drawアニメーション速度倍率設定: {}", speed);
-            }
         }
     }
 

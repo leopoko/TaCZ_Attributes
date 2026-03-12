@@ -8,9 +8,6 @@ import com.tacz.guns.resource.pojo.data.gun.GunData;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -26,8 +23,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  */
 @Mixin(GunData.class)
 public class ShootIntervalMixin {
-
-    private static final Logger LOGGER = LogManager.getLogger();
 
     @Inject(
             method = "getShootInterval",
@@ -50,12 +45,6 @@ public class ShootIntervalMixin {
 
         long original = cir.getReturnValue();
         long modified = Math.max(1L, (long) (original / combined));
-
-        if (!FMLEnvironment.production) {
-            LOGGER.info("[TaCZ Attributes] RPM倍率適用: interval {} -> {} ms (全体: {}, 銃種[{}]: {})",
-                    original, modified, globalRpm,
-                    gunType != null ? gunType.getTypeId() : "unknown", typeRpm);
-        }
 
         cir.setReturnValue(modified);
     }

@@ -13,14 +13,9 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 @Mod.EventBusSubscriber(modid = Tacz_attributes.MODID)
 public class GunDamageModifier {
-    private static final Logger LOGGER = LogManager.getLogger();
-
     @SubscribeEvent
     public static void onGunHurt(EntityHurtByGunEvent.Pre event) {
         if (event.getLogicalSide() != LogicalSide.SERVER) return;
@@ -65,14 +60,6 @@ public class GunDamageModifier {
         if (combinedModifier != 1.0) {
             float modifiedDamage = (float) (event.getBaseAmount() * combinedModifier);
 
-            if (!FMLEnvironment.production) {
-                LOGGER.info("[TaCZ Attributes] 銃ダメージ倍率適用: {} -> {} (全体: {}, 銃種[{}]: {}, {}: {}×{}, モード[{}]: {}×{})",
-                        event.getBaseAmount(), modifiedDamage, globalModifier,
-                        gunType != null ? gunType.getTypeId() : "unknown", typeModifier,
-                        isAds ? "ADS" : "腰撃ち", adsHipGlobal, adsHipType,
-                        fireMode != null ? fireMode.name() : "unknown", fireModeGlobal, fireModeType);
-            }
-
             event.setBaseAmount(modifiedDamage);
         }
 
@@ -86,12 +73,6 @@ public class GunDamageModifier {
             double hsCombined = hsGlobal * hsType;
             if (hsCombined != 1.0) {
                 float newHsMultiplier = (float) (event.getHeadshotMultiplier() * hsCombined);
-
-                if (!FMLEnvironment.production) {
-                    LOGGER.info("[TaCZ Attributes] ヘッドショット倍率適用: {} -> {} (全体: {}, 銃種[{}]: {})",
-                            event.getHeadshotMultiplier(), newHsMultiplier, hsGlobal,
-                            gunType != null ? gunType.getTypeId() : "unknown", hsType);
-                }
 
                 event.setHeadshotMultiplier(newHsMultiplier);
             }

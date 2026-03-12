@@ -9,9 +9,6 @@ import com.tacz.guns.item.ModernKineticGunScriptAPI;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -30,8 +27,6 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
  */
 @Mixin(ModernKineticGunScriptAPI.class)
 public class BulletAmountMixin {
-
-    private static final Logger LOGGER = LogManager.getLogger();
 
     @Shadow(remap = false)
     private LivingEntity shooter;
@@ -79,13 +74,6 @@ public class BulletAmountMixin {
 
         int modified = Math.max(1, (int) (bulletAmount * combined));
 
-        if (!FMLEnvironment.production) {
-            LOGGER.info("[TaCZ Attributes] {}弾数倍率適用: {} -> {} (全体: {}, 銃種[{}]: {})",
-                    mode == FireMode.SEMI ? "セミ" : "フルオート",
-                    bulletAmount, modified, globalMult,
-                    gunType != null ? gunType.getTypeId() : "unknown", typeMult);
-        }
-
         return modified;
     }
 
@@ -112,12 +100,6 @@ public class BulletAmountMixin {
         if (combined == 1.0) return cycles;
 
         int modified = Math.max(1, (int) (cycles * combined));
-
-        if (!FMLEnvironment.production) {
-            LOGGER.info("[TaCZ Attributes] バースト弾数倍率適用: {} -> {} (全体: {}, 銃種[{}]: {})",
-                    cycles, modified, globalMult,
-                    gunType != null ? gunType.getTypeId() : "unknown", typeMult);
-        }
 
         return modified;
     }
@@ -153,12 +135,6 @@ public class BulletAmountMixin {
         if (combined == 1.0) return interval;
 
         long modified = Math.max(1L, (long) (interval / combined));
-
-        if (!FMLEnvironment.production) {
-            LOGGER.info("[TaCZ Attributes] バースト間隔倍率適用: {}ms -> {}ms (全体: {}, 銃種[{}]: {})",
-                    interval, modified, globalMult,
-                    gunType != null ? gunType.getTypeId() : "unknown", typeMult);
-        }
 
         return modified;
     }

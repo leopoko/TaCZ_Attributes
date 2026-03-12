@@ -8,9 +8,6 @@ import com.tacz.guns.client.event.CameraSetupEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,8 +32,6 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
  */
 @Mixin(CameraSetupEvent.class)
 public class RecoilMixin {
-
-    private static final Logger LOGGER = LogManager.getLogger();
 
     /**
      * initialCameraRecoil() 内の genPitchSplineFunction(float) の引数を変更し、
@@ -86,14 +81,6 @@ public class RecoilMixin {
         double combinedModifier = globalRecoil * verticalRecoil * adsHipRecoil * adsHipVerticalRecoil
                 * typeRecoil * typeVertical * typeAdsHip * typeAdsHipVertical;
         if (combinedModifier == 1.0) return modifier;
-
-        if (!FMLEnvironment.production) {
-            LOGGER.info("[TaCZ Attributes] 縦反動倍率適用: modifier {} -> {} (全般: {}, 縦: {}, {}: {}×{}, 銃種[{}]: {}×{}×{}×{})",
-                    modifier, modifier * (float) combinedModifier, globalRecoil, verticalRecoil,
-                    isAds ? "ADS" : "腰撃ち", adsHipRecoil, adsHipVerticalRecoil,
-                    gunType != null ? gunType.getTypeId() : "unknown",
-                    typeRecoil, typeVertical, typeAdsHip, typeAdsHipVertical);
-        }
 
         return modifier * (float) combinedModifier;
     }
@@ -146,14 +133,6 @@ public class RecoilMixin {
         double combinedModifier = globalRecoil * horizontalRecoil * adsHipRecoil * adsHipHorizontalRecoil
                 * typeRecoil * typeHorizontal * typeAdsHip * typeAdsHipHorizontal;
         if (combinedModifier == 1.0) return modifier;
-
-        if (!FMLEnvironment.production) {
-            LOGGER.info("[TaCZ Attributes] 横反動倍率適用: modifier {} -> {} (全般: {}, 横: {}, {}: {}×{}, 銃種[{}]: {}×{}×{}×{})",
-                    modifier, modifier * (float) combinedModifier, globalRecoil, horizontalRecoil,
-                    isAds ? "ADS" : "腰撃ち", adsHipRecoil, adsHipHorizontalRecoil,
-                    gunType != null ? gunType.getTypeId() : "unknown",
-                    typeRecoil, typeHorizontal, typeAdsHip, typeAdsHipHorizontal);
-        }
 
         return modifier * (float) combinedModifier;
     }

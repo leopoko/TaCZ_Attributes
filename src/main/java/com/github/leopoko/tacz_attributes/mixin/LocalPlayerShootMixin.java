@@ -9,9 +9,6 @@ import com.tacz.guns.client.gameplay.LocalPlayerShoot;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -29,8 +26,6 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
  */
 @Mixin(LocalPlayerShoot.class)
 public class LocalPlayerShootMixin {
-
-    private static final Logger LOGGER = LogManager.getLogger();
 
     @Shadow(remap = false)
     private LocalPlayer player;
@@ -67,12 +62,6 @@ public class LocalPlayerShootMixin {
 
         int modified = Math.max(1, (int) (cycles * combined));
 
-        if (!FMLEnvironment.production) {
-            LOGGER.info("[TaCZ Attributes] クライアント側バースト弾数倍率適用: {} -> {} (全体: {}, 銃種[{}]: {})",
-                    cycles, modified, globalMult,
-                    gunType != null ? gunType.getTypeId() : "unknown", typeMult);
-        }
-
         return modified;
     }
 
@@ -108,12 +97,6 @@ public class LocalPlayerShootMixin {
         if (combined == 1.0) return interval;
 
         long modified = Math.max(1L, (long) (interval / combined));
-
-        if (!FMLEnvironment.production) {
-            LOGGER.info("[TaCZ Attributes] クライアント側バースト間隔倍率適用: {}ms -> {}ms (全体: {}, 銃種[{}]: {})",
-                    interval, modified, globalMult,
-                    gunType != null ? gunType.getTypeId() : "unknown", typeMult);
-        }
 
         return modified;
     }

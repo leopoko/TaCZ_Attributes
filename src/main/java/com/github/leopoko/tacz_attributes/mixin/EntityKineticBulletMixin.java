@@ -11,9 +11,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -30,8 +27,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  */
 @Mixin(EntityKineticBullet.class)
 public abstract class EntityKineticBulletMixin extends Projectile {
-
-    private static final Logger LOGGER = LogManager.getLogger();
 
     @Shadow(remap = false)
     private int pierce;
@@ -81,12 +76,6 @@ public abstract class EntityKineticBulletMixin extends Projectile {
 
         if (result == knockback) return knockback;
 
-        if (!FMLEnvironment.production) {
-            LOGGER.info("[TaCZ Attributes] ノックバック適用: {} -> {} (基本値追加: +{}+{}, 倍率: {}×{}, 銃種[{}])",
-                    knockback, result, globalBase, typeBase, globalMult, typeMult,
-                    gunType != null ? gunType.getTypeId() : "unknown");
-        }
-
         return result;
     }
 
@@ -115,11 +104,6 @@ public abstract class EntityKineticBulletMixin extends Projectile {
         int oldPierce = this.pierce;
         this.pierce = Math.max(1, (int) (this.pierce * combined));
 
-        if (!FMLEnvironment.production) {
-            LOGGER.info("[TaCZ Attributes] 貫通数倍率適用: {} -> {} (全体: {}, 銃種[{}]: {})",
-                    oldPierce, this.pierce, globalPierce,
-                    gunType != null ? gunType.getTypeId() : "unknown", typePierce);
-        }
     }
 
     @Unique

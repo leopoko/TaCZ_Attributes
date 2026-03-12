@@ -14,10 +14,6 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.util.UUID;
 
 /**
@@ -30,7 +26,6 @@ import java.util.UUID;
 @Mod.EventBusSubscriber(modid = Tacz_attributes.MODID)
 public class GunMovementSpeedHandler {
 
-    private static final Logger LOGGER = LogManager.getLogger();
     private static final UUID TACZ_ATTR_SPEED_MODIFIER_UUID = UUID.fromString("a3c7e8f1-5d2b-4a96-b8e3-1f7d9c6a2e04");
 
     @SubscribeEvent
@@ -63,12 +58,6 @@ public class GunMovementSpeedHandler {
         // MULTIPLY_TOTAL: 最終値 *= (1 + amount)
         // combined=0.8 → amount=-0.2 → 最終値 *= 0.8
         double amount = combined - 1.0;
-
-        if (!FMLEnvironment.production) {
-            LOGGER.info("[TaCZ Attributes] 移動速度倍率適用: combined={} (全体: {}, 銃種[{}]: {})",
-                    combined, globalSpeed,
-                    gunType != null ? gunType.getTypeId() : "unknown", typeSpeed);
-        }
 
         speedAttr.addTransientModifier(new AttributeModifier(
                 TACZ_ATTR_SPEED_MODIFIER_UUID, "TaCZ Attributes Gun Movement Speed",

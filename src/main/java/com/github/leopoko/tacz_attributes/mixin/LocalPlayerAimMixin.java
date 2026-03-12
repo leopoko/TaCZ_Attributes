@@ -7,9 +7,6 @@ import com.tacz.guns.client.gameplay.LocalPlayerAim;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -26,8 +23,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
  */
 @Mixin(LocalPlayerAim.class)
 public class LocalPlayerAimMixin {
-
-    private static final Logger LOGGER = LogManager.getLogger();
 
     @Shadow(remap = false)
     @Final
@@ -56,12 +51,6 @@ public class LocalPlayerAimMixin {
         if (combined == 1.0) return aimTime;
 
         float modified = (float) (aimTime / combined);
-
-        if (!FMLEnvironment.production) {
-            LOGGER.info("[TaCZ Attributes] クライアントADS速度倍率適用: aimTime {} -> {} (全体: {}, 銃種[{}]: {})",
-                    aimTime, modified, globalAdsSpeed,
-                    gunType != null ? gunType.getTypeId() : "unknown", typeAdsSpeed);
-        }
 
         return Math.max(0, modified);
     }

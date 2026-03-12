@@ -11,9 +11,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -39,8 +36,6 @@ import java.util.function.Supplier;
 @Mixin(LivingEntityDrawGun.class)
 public class LivingEntityDrawGunMixin {
 
-    private static final Logger LOGGER = LogManager.getLogger();
-
     @Shadow(remap = false)
     private LivingEntity shooter;
 
@@ -65,10 +60,6 @@ public class LivingEntityDrawGunMixin {
             long scaledOffset = (long) (futureOffset / speed);
             this.data.drawTimestamp = now + scaledOffset;
 
-            if (!FMLEnvironment.production) {
-                LOGGER.info("[TaCZ Attributes] Holster時間スケーリング: {}ms -> {}ms (速度: {})",
-                        futureOffset, scaledOffset, speed);
-            }
         }
     }
 
@@ -96,11 +87,6 @@ public class LivingEntityDrawGunMixin {
             long drawMs = (long) (index.getGunData().getDrawTime() * 1000);
             long delta = (long) (drawMs * (1.0 - 1.0 / speed));
             long adjusted = Math.max(0L, coolDown - delta);
-
-            if (!FMLEnvironment.production && adjusted != coolDown) {
-                LOGGER.info("[TaCZ Attributes] Draw時間スケーリング: coolDown {}ms -> {}ms (drawMs: {}, delta: {}, 速度: {})",
-                        coolDown, adjusted, drawMs, delta, speed);
-            }
 
             cir.setReturnValue(adjusted);
         });

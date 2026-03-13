@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2] - 2026-03-13
+
+### 追加
+- 標的ブロック（tacz:target）にダメージ属性倍率を反映（TargetBlockMixin）
+- ITargetEntity（TargetMinecart等）にダメージ属性倍率を反映（EntityKineticBulletMixin）
+- ダメージ倍率計算の共通ユーティリティ（DamageModifierHelper）
+
 ## [1.1] - 2026-03-12
 
 ### 追加

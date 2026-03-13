@@ -2,7 +2,10 @@ package com.github.leopoko.tacz_attributes.mixin;
 
 import com.github.leopoko.tacz_attributes.attribute.CustomAttributes;
 import com.github.leopoko.tacz_attributes.attribute.GunType;
+import com.github.leopoko.tacz_attributes.util.FireModeHelper;
 import com.github.leopoko.tacz_attributes.util.GunTypeResolver;
+import com.tacz.guns.api.entity.IGunOperator;
+import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.entity.EntityKineticBullet;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -22,6 +25,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * EntityKineticBullet に対するMixin。
  * <p>
+ * - ITargetEntityダメージ: onHitEntity() 内の ITargetEntity.onProjectileHit() のダメージ引数に属性倍率を適用
  * - ノックバック倍率: onHitEntity() 内の KnockBackModifier.setKnockBackStrength() の引数を変更
  * - 貫通数倍率: コンストラクタ末尾で pierce フィールドを変更
  */
@@ -36,6 +40,62 @@ public abstract class EntityKineticBulletMixin extends Projectile {
 
     protected EntityKineticBulletMixin(EntityType<? extends Projectile> type, Level level) {
         super(type, level);
+    }
+
+    /**
+     * onHitEntity() 内の ITargetEntity.onProjectileHit() のダメージ引数に
+     * GunDamageModifier と同等の属性倍率を適用する。
+     * <p>
+     * TaCZ は ITargetEntity に対して EntityHurtByGunEvent.Pre を発火せずに
+     * 直接 onProjectileHit() を呼ぶため、イベント経由のダメージ修正が適用されない。
+     * ここで同じダメージ計算を行い、属性値を反映させる。
+     */
+    @ModifyArg(
+            method = "onHitEntity",
+            at = @At(value = "INVOKE", target = "Lcom/tacz/guns/api/entity/ITargetEntity;onProjectileHit(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/EntityHitResult;Lnet/minecraft/world/damagesource/DamageSource;F)V"),
+            index = 3,
+            remap = false
+    )
+    private float tacz_attributes$modifyTargetDamage(float damage) {
+        Entity owner = this.getOwner();
+        if (!(owner instanceof LivingEntity shooter)) return damage;
+
+        GunType gunType = GunTypeResolver.resolve(this.gunId);
+
+        // 全体ダメージ倍率
+        double globalModifier = tacz_attributes$getAttributeValue(shooter, CustomAttributes.GUN_DAMAGE.get());
+
+        // 銃種別ダメージ倍率
+        double typeModifier = 1.0;
+        if (gunType != null) {
+            typeModifier = tacz_attributes$getAttributeValue(shooter, gunType.getDamageAttribute().get());
+        }
+
+        // ADS / 腰撃ちダメージ倍率
+        boolean isAds = IGunOperator.fromLivingEntity(shooter).getSynIsAiming();
+        double adsHipGlobal;
+        double adsHipType = 1.0;
+        if (isAds) {
+            adsHipGlobal = tacz_attributes$getAttributeValue(shooter, CustomAttributes.ADS_DAMAGE.get());
+            if (gunType != null) {
+                adsHipType = tacz_attributes$getAttributeValue(shooter, gunType.getAdsDamageAttribute().get());
+            }
+        } else {
+            adsHipGlobal = tacz_attributes$getAttributeValue(shooter, CustomAttributes.HIP_FIRE_DAMAGE.get());
+            if (gunType != null) {
+                adsHipType = tacz_attributes$getAttributeValue(shooter, gunType.getHipFireDamageAttribute().get());
+            }
+        }
+
+        // 射撃モード別ダメージ倍率
+        FireMode fireMode = FireModeHelper.getFireMode(shooter.getMainHandItem());
+        double fireModeGlobal = FireModeHelper.getAttributeValue(shooter, FireModeHelper.getGlobalDamageAttribute(fireMode));
+        double fireModeType = FireModeHelper.getAttributeValue(shooter, FireModeHelper.getTypeDamageAttribute(gunType, fireMode));
+
+        double combinedModifier = globalModifier * typeModifier * adsHipGlobal * adsHipType * fireModeGlobal * fireModeType;
+        if (combinedModifier == 1.0) return damage;
+
+        return (float) (damage * combinedModifier);
     }
 
     /**

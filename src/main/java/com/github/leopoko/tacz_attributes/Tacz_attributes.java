@@ -38,9 +38,10 @@ public class Tacz_attributes {
             Map modifiers = AttachmentPropertyManager.getModifiers();
 
             // 既存のTaCZモディファイアをラップして属性倍率を反映
+            // ID一覧: damage, recoil, inaccuracy, rpm, ads, head_shot, knockback, pierce, movement_speed
             Set<String> wrappableIds = Set.of(
-                    "damage", "recoil_modifier", "inaccuracy_addend", "inaccuracy",
-                    "rpm", "ads_addend", "head_shot", "knockback", "pierce", "movement_speed"
+                    "damage", "recoil", "inaccuracy",
+                    "rpm", "ads", "head_shot", "knockback", "pierce", "movement_speed"
             );
             for (String id : wrappableIds) {
                 IAttachmentModifier existing = (IAttachmentModifier) modifiers.get(id);

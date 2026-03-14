@@ -77,7 +77,95 @@ public class AttributePropertyModifier implements IAttachmentModifier<Object, Ob
         FireMode fireMode = (iGun != null) ? iGun.getFireMode(gunStack) : null;
         if (fireMode == FireMode.UNKNOWN) fireMode = null;
 
-        // === 倍率系属性（TaCZモディファイアでカバーされないもののみ） ===
+        // === TaCZモディファイアが空だった場合のフォールバック表示 ===
+        // アタッチメントがない場合、TaCZモディファイアのデリゲートが空リストを返すため、
+        // ラッパーが属性効果を反映できない。その場合はここで独自バーとして表示する。
+
+        // ダメージ
+        if (!DiagramsModifierWrapper.wasProcessed("damage")) {
+            double damage = getAttr(player, CustomAttributes.GUN_DAMAGE)
+                    * getTypeAttr(player, gunType, GunType::getDamageAttribute)
+                    * getAttr(player, CustomAttributes.HIP_FIRE_DAMAGE)
+                    * getTypeAttr(player, gunType, GunType::getHipFireDamageAttribute)
+                    * getFireModeDamageMult(player, fireMode, gunType);
+            addMultiplierEntry(result, "gui.tacz_attributes.diagram.damage", damage, true);
+        }
+
+        // 縦反動
+        if (!DiagramsModifierWrapper.wasProcessed("recoil")) {
+            double vertRecoil = getAttr(player, CustomAttributes.RECOIL)
+                    * getAttr(player, CustomAttributes.VERTICAL_RECOIL)
+                    * getAttr(player, CustomAttributes.HIP_FIRE_RECOIL)
+                    * getAttr(player, CustomAttributes.HIP_FIRE_VERTICAL_RECOIL)
+                    * getTypeAttr(player, gunType, GunType::getRecoilAttribute)
+                    * getTypeAttr(player, gunType, GunType::getVerticalRecoilAttribute)
+                    * getTypeAttr(player, gunType, GunType::getHipFireRecoilAttribute)
+                    * getTypeAttr(player, gunType, GunType::getHipFireVerticalRecoilAttribute);
+            addMultiplierEntry(result, "gui.tacz_attributes.diagram.vertical_recoil", vertRecoil, false);
+
+            // 横反動
+            double horizRecoil = getAttr(player, CustomAttributes.RECOIL)
+                    * getAttr(player, CustomAttributes.HORIZONTAL_RECOIL)
+                    * getAttr(player, CustomAttributes.HIP_FIRE_RECOIL)
+                    * getAttr(player, CustomAttributes.HIP_FIRE_HORIZONTAL_RECOIL)
+                    * getTypeAttr(player, gunType, GunType::getRecoilAttribute)
+                    * getTypeAttr(player, gunType, GunType::getHorizontalRecoilAttribute)
+                    * getTypeAttr(player, gunType, GunType::getHipFireRecoilAttribute)
+                    * getTypeAttr(player, gunType, GunType::getHipFireHorizontalRecoilAttribute);
+            addMultiplierEntry(result, "gui.tacz_attributes.diagram.horizontal_recoil", horizRecoil, false);
+        }
+
+        // 精度
+        if (!DiagramsModifierWrapper.wasProcessed("inaccuracy")) {
+            double accuracy = getAttr(player, CustomAttributes.HIP_FIRE_ACCURACY)
+                    * getTypeAttr(player, gunType, GunType::getHipFireAccuracyAttribute)
+                    * getFireModeAccuracyMult(player, fireMode, gunType);
+            addMultiplierEntry(result, "gui.tacz_attributes.diagram.accuracy", accuracy, true);
+        }
+
+        // RPM
+        if (!DiagramsModifierWrapper.wasProcessed("rpm")) {
+            double rpm = getAttr(player, CustomAttributes.RPM_MULTIPLIER)
+                    * getTypeAttr(player, gunType, GunType::getRpmMultiplierAttribute);
+            addMultiplierEntry(result, "gui.tacz_attributes.diagram.rpm", rpm, true);
+        }
+
+        // ADS速度
+        if (!DiagramsModifierWrapper.wasProcessed("ads")) {
+            double adsSpeed = getAttr(player, CustomAttributes.ADS_SPEED)
+                    * getTypeAttr(player, gunType, GunType::getAdsSpeedAttribute);
+            addMultiplierEntry(result, "gui.tacz_attributes.diagram.ads_speed", adsSpeed, true);
+        }
+
+        // ヘッドショット
+        if (!DiagramsModifierWrapper.wasProcessed("head_shot")) {
+            double headshot = getAttr(player, CustomAttributes.HEADSHOT_MULTIPLIER)
+                    * getTypeAttr(player, gunType, GunType::getHeadshotMultiplierAttribute);
+            addMultiplierEntry(result, "gui.tacz_attributes.diagram.headshot", headshot, true);
+        }
+
+        // ノックバック
+        if (!DiagramsModifierWrapper.wasProcessed("knockback")) {
+            double knockback = getAttr(player, CustomAttributes.KNOCKBACK_MULTIPLIER)
+                    * getTypeAttr(player, gunType, GunType::getKnockbackMultiplierAttribute);
+            addMultiplierEntry(result, "gui.tacz_attributes.diagram.knockback", knockback, true);
+        }
+
+        // 貫通
+        if (!DiagramsModifierWrapper.wasProcessed("pierce")) {
+            double pierce = getAttr(player, CustomAttributes.PIERCE_MULTIPLIER)
+                    * getTypeAttr(player, gunType, GunType::getPierceMultiplierAttribute);
+            addMultiplierEntry(result, "gui.tacz_attributes.diagram.pierce", pierce, true);
+        }
+
+        // 移動速度
+        if (!DiagramsModifierWrapper.wasProcessed("movement_speed")) {
+            double moveSpeed = getAttr(player, CustomAttributes.GUN_MOVEMENT_SPEED)
+                    * getTypeAttr(player, gunType, GunType::getGunMovementSpeedAttribute);
+            addMultiplierEntry(result, "gui.tacz_attributes.diagram.movement", moveSpeed, true);
+        }
+
+        // === TaCZモディファイアでカバーされないカテゴリ ===
 
         // リロード速度
         double reloadSpeed = getAttr(player, CustomAttributes.RELOAD_SPEED)
@@ -206,6 +294,22 @@ public class AttributePropertyModifier implements IAttachmentModifier<Object, Ob
             return player.getAttributeValue(a);
         }
         return 0.0;
+    }
+
+    /** FireMode に基づくダメージ倍率 */
+    private static double getFireModeDamageMult(LocalPlayer player, @Nullable FireMode mode,
+                                                 @Nullable GunType gunType) {
+        if (mode == null) return 1.0;
+        return FireModeHelper.getAttributeValue(player, FireModeHelper.getGlobalDamageAttribute(mode))
+                * FireModeHelper.getAttributeValue(player, FireModeHelper.getTypeDamageAttribute(gunType, mode));
+    }
+
+    /** FireMode に基づく精度倍率 */
+    private static double getFireModeAccuracyMult(LocalPlayer player, @Nullable FireMode mode,
+                                                   @Nullable GunType gunType) {
+        if (mode == null) return 1.0;
+        return FireModeHelper.getAttributeValue(player, FireModeHelper.getGlobalAccuracyAttribute(mode))
+                * FireModeHelper.getAttributeValue(player, FireModeHelper.getTypeAccuracyAttribute(gunType, mode));
     }
 
     /** FireMode に基づく弾数倍率 */

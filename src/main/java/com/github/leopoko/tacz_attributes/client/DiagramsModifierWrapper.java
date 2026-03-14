@@ -18,7 +18,9 @@ import net.minecraftforge.registries.RegistryObject;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -31,12 +33,26 @@ import java.util.function.Function;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class DiagramsModifierWrapper implements IAttachmentModifier {
 
+    /**
+     * 各フレームでデリゲートがエントリを返したモディファイアIDのセット。
+     * AttributePropertyModifier がフォールバック表示の要否を判断するために参照する。
+     */
+    private static final Set<String> processedModifiers = new HashSet<>();
+
     private final IAttachmentModifier delegate;
     private final String modifierId;
 
     public DiagramsModifierWrapper(IAttachmentModifier delegate) {
         this.delegate = delegate;
         this.modifierId = delegate.getId();
+    }
+
+    /**
+     * 指定IDのモディファイアがデリゲートからエントリを返したか（＝ラッパーが変換済みか）。
+     * falseの場合、AttributePropertyModifier がフォールバック表示を行う。
+     */
+    public static boolean wasProcessed(String id) {
+        return processedModifiers.contains(id);
     }
 
     @Override
@@ -60,7 +76,14 @@ public class DiagramsModifierWrapper implements IAttachmentModifier {
         List<DiagramsData> original = delegate.getPropertyDiagramsData(gun, data, cache);
 
         LocalPlayer player = Minecraft.getInstance().player;
-        if (player == null || original.isEmpty()) return original;
+        if (player == null) return original;
+
+        // デリゲートがエントリを返したかどうかを記録
+        if (original.isEmpty()) {
+            processedModifiers.remove(modifierId);
+            return original;
+        }
+        processedModifiers.add(modifierId);
 
         GunType gunType = GunTypeResolver.resolveFromItem(gun);
         FireMode fireMode = FireModeHelper.getFireMode(gun);

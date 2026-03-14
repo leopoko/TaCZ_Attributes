@@ -12,16 +12,13 @@ import com.tacz.guns.resource.modifier.AttachmentCacheProperty;
 import com.tacz.guns.resource.pojo.data.gun.GunData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.RegistryObject;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 
 /**
  * TaCZの既存IAttachmentModifierをラップし、getPropertyDiagramsData()の結果に
@@ -151,9 +148,9 @@ public class DiagramsModifierWrapper implements IAttachmentModifier {
             return transformAimAccuracy(d, player, gunType, fireMode);
         } else {
             // hipfire/sneak/lie: inaccuracy値 → accuracy属性で割る(値が下がる=精度向上)
-            double accuracyMult = getAttr(player, CustomAttributes.HIP_FIRE_ACCURACY)
-                    * getTypeAttr(player, gunType, GunType::getHipFireAccuracyAttribute)
-                    * getFireModeAccuracyMult(player, fireMode, gunType);
+            double accuracyMult = FireModeHelper.getAttributeValue(player, CustomAttributes.HIP_FIRE_ACCURACY)
+                    * FireModeHelper.getTypeAttributeValue(player, gunType, GunType::getHipFireAccuracyAttribute)
+                    * FireModeHelper.getFireModeAccuracyMultiplier(player, fireMode, gunType);
             // inaccuracy / accuracy = inaccuracy * (1/accuracy)
             return applySimpleMultiplier(d, 1.0 / accuracyMult);
         }
@@ -165,9 +162,9 @@ public class DiagramsModifierWrapper implements IAttachmentModifier {
      */
     private DiagramsData transformAimAccuracy(DiagramsData d, LocalPlayer player,
                                                @Nullable GunType gunType, @Nullable FireMode fireMode) {
-        double accMult = getAttr(player, CustomAttributes.ADS_ACCURACY)
-                * getTypeAttr(player, gunType, GunType::getAdsAccuracyAttribute)
-                * getFireModeAccuracyMult(player, fireMode, gunType);
+        double accMult = FireModeHelper.getAttributeValue(player, CustomAttributes.ADS_ACCURACY)
+                * FireModeHelper.getTypeAttributeValue(player, gunType, GunType::getAdsAccuracyAttribute)
+                * FireModeHelper.getFireModeAccuracyMultiplier(player, fireMode, gunType);
         if (Math.abs(accMult - 1.0) < 0.001) return d;
 
         // AIM: defaultPercent = base accuracy (0-1), modifierPercent = attachment delta
@@ -213,10 +210,10 @@ public class DiagramsModifierWrapper implements IAttachmentModifier {
      */
     private DiagramsData transformKnockback(DiagramsData d, LocalPlayer player,
                                              @Nullable GunType gunType) {
-        double additive = getChanceAttr(player, CustomAttributes.KNOCKBACK_BASE)
-                + getTypeChanceAttr(player, gunType, GunType::getKnockbackBaseAttribute);
-        double multiplier = getAttr(player, CustomAttributes.KNOCKBACK_MULTIPLIER)
-                * getTypeAttr(player, gunType, GunType::getKnockbackMultiplierAttribute);
+        double additive = FireModeHelper.getChanceAttributeValue(player, CustomAttributes.KNOCKBACK_BASE)
+                + FireModeHelper.getTypeChanceAttributeValue(player, gunType, GunType::getKnockbackBaseAttribute);
+        double multiplier = FireModeHelper.getAttributeValue(player, CustomAttributes.KNOCKBACK_MULTIPLIER)
+                * FireModeHelper.getTypeAttributeValue(player, gunType, GunType::getKnockbackMultiplierAttribute);
 
         if (Math.abs(additive) < 0.001 && Math.abs(multiplier - 1.0) < 0.001) return d;
 
@@ -239,63 +236,62 @@ public class DiagramsModifierWrapper implements IAttachmentModifier {
     // ========================================================================================
 
     /** ダメージ倍率: gun_damage × type × hip_fire × type_hip_fire × fire_mode × type_fire_mode */
-    private double getDamageMultiplier(LocalPlayer player, @Nullable GunType gunType,
-                                        @Nullable FireMode fireMode) {
-        return getAttr(player, CustomAttributes.GUN_DAMAGE)
-                * getTypeAttr(player, gunType, GunType::getDamageAttribute)
-                * getAttr(player, CustomAttributes.HIP_FIRE_DAMAGE)
-                * getTypeAttr(player, gunType, GunType::getHipFireDamageAttribute)
-                * getFireModeDamageMult(player, fireMode, gunType);
+    private static double getDamageMultiplier(LocalPlayer player, @Nullable GunType gunType,
+                                               @Nullable FireMode fireMode) {
+        return FireModeHelper.getAttributeValue(player, CustomAttributes.GUN_DAMAGE)
+                * FireModeHelper.getTypeAttributeValue(player, gunType, GunType::getDamageAttribute)
+                * FireModeHelper.getAttributeValue(player, CustomAttributes.HIP_FIRE_DAMAGE)
+                * FireModeHelper.getTypeAttributeValue(player, gunType, GunType::getHipFireDamageAttribute)
+                * FireModeHelper.getFireModeDamageMultiplier(player, fireMode, gunType);
     }
 
     /** 反動倍率: recoil × (vertical/horizontal) × hip_fire × hip_fire_(v/h) × type系 */
-    private double getRecoilMultiplier(DiagramsData d, LocalPlayer player, @Nullable GunType gunType) {
-        double base = getAttr(player, CustomAttributes.RECOIL)
-                * getAttr(player, CustomAttributes.HIP_FIRE_RECOIL)
-                * getTypeAttr(player, gunType, GunType::getRecoilAttribute)
-                * getTypeAttr(player, gunType, GunType::getHipFireRecoilAttribute);
+    private static double getRecoilMultiplier(DiagramsData d, LocalPlayer player, @Nullable GunType gunType) {
+        double base = FireModeHelper.getAttributeValue(player, CustomAttributes.RECOIL)
+                * FireModeHelper.getAttributeValue(player, CustomAttributes.HIP_FIRE_RECOIL)
+                * FireModeHelper.getTypeAttributeValue(player, gunType, GunType::getRecoilAttribute)
+                * FireModeHelper.getTypeAttributeValue(player, gunType, GunType::getHipFireRecoilAttribute);
 
         // titleKeyでpitch(縦)/yaw(横)を判別
-        boolean isPitch = d.titleKey().contains("pitch");
-        if (isPitch) {
-            base *= getAttr(player, CustomAttributes.VERTICAL_RECOIL)
-                    * getAttr(player, CustomAttributes.HIP_FIRE_VERTICAL_RECOIL)
-                    * getTypeAttr(player, gunType, GunType::getVerticalRecoilAttribute)
-                    * getTypeAttr(player, gunType, GunType::getHipFireVerticalRecoilAttribute);
+        if (d.titleKey().contains("pitch")) {
+            base *= FireModeHelper.getAttributeValue(player, CustomAttributes.VERTICAL_RECOIL)
+                    * FireModeHelper.getAttributeValue(player, CustomAttributes.HIP_FIRE_VERTICAL_RECOIL)
+                    * FireModeHelper.getTypeAttributeValue(player, gunType, GunType::getVerticalRecoilAttribute)
+                    * FireModeHelper.getTypeAttributeValue(player, gunType, GunType::getHipFireVerticalRecoilAttribute);
         } else {
-            base *= getAttr(player, CustomAttributes.HORIZONTAL_RECOIL)
-                    * getAttr(player, CustomAttributes.HIP_FIRE_HORIZONTAL_RECOIL)
-                    * getTypeAttr(player, gunType, GunType::getHorizontalRecoilAttribute)
-                    * getTypeAttr(player, gunType, GunType::getHipFireHorizontalRecoilAttribute);
+            base *= FireModeHelper.getAttributeValue(player, CustomAttributes.HORIZONTAL_RECOIL)
+                    * FireModeHelper.getAttributeValue(player, CustomAttributes.HIP_FIRE_HORIZONTAL_RECOIL)
+                    * FireModeHelper.getTypeAttributeValue(player, gunType, GunType::getHorizontalRecoilAttribute)
+                    * FireModeHelper.getTypeAttributeValue(player, gunType, GunType::getHipFireHorizontalRecoilAttribute);
         }
         return base;
     }
 
-    private double getRpmMultiplier(LocalPlayer player, @Nullable GunType gunType) {
-        return getAttr(player, CustomAttributes.RPM_MULTIPLIER)
-                * getTypeAttr(player, gunType, GunType::getRpmMultiplierAttribute);
+    private static double getRpmMultiplier(LocalPlayer player, @Nullable GunType gunType) {
+        return FireModeHelper.getAttributeValue(player, CustomAttributes.RPM_MULTIPLIER)
+                * FireModeHelper.getTypeAttributeValue(player, gunType, GunType::getRpmMultiplierAttribute);
     }
 
     /** ADS時間倍率: 速度が上がると時間が短くなる → 1/speed */
-    private double getAdsTimeMultiplier(LocalPlayer player, @Nullable GunType gunType) {
-        double speed = getAttr(player, CustomAttributes.ADS_SPEED)
-                * getTypeAttr(player, gunType, GunType::getAdsSpeedAttribute);
+    private static double getAdsTimeMultiplier(LocalPlayer player, @Nullable GunType gunType) {
+        double speed = FireModeHelper.getAttributeValue(player, CustomAttributes.ADS_SPEED)
+                * FireModeHelper.getTypeAttributeValue(player, gunType, GunType::getAdsSpeedAttribute);
         return 1.0 / speed;
     }
 
-    private double getHeadshotMultiplier(LocalPlayer player, @Nullable GunType gunType) {
-        return getAttr(player, CustomAttributes.HEADSHOT_MULTIPLIER)
-                * getTypeAttr(player, gunType, GunType::getHeadshotMultiplierAttribute);
+    private static double getHeadshotMultiplier(LocalPlayer player, @Nullable GunType gunType) {
+        return FireModeHelper.getAttributeValue(player, CustomAttributes.HEADSHOT_MULTIPLIER)
+                * FireModeHelper.getTypeAttributeValue(player, gunType, GunType::getHeadshotMultiplierAttribute);
     }
 
-    private double getPierceMultiplier(LocalPlayer player, @Nullable GunType gunType) {
-        return getAttr(player, CustomAttributes.PIERCE_MULTIPLIER)
-                * getTypeAttr(player, gunType, GunType::getPierceMultiplierAttribute);
+    private static double getPierceMultiplier(LocalPlayer player, @Nullable GunType gunType) {
+        return FireModeHelper.getAttributeValue(player, CustomAttributes.PIERCE_MULTIPLIER)
+                * FireModeHelper.getTypeAttributeValue(player, gunType, GunType::getPierceMultiplierAttribute);
     }
 
-    private double getMovementSpeedMultiplier(LocalPlayer player, @Nullable GunType gunType) {
-        return getAttr(player, CustomAttributes.GUN_MOVEMENT_SPEED)
-                * getTypeAttr(player, gunType, GunType::getGunMovementSpeedAttribute);
+    private static double getMovementSpeedMultiplier(LocalPlayer player, @Nullable GunType gunType) {
+        return FireModeHelper.getAttributeValue(player, CustomAttributes.GUN_MOVEMENT_SPEED)
+                * FireModeHelper.getTypeAttributeValue(player, gunType, GunType::getGunMovementSpeedAttribute);
     }
 
     // ========================================================================================
@@ -304,30 +300,16 @@ public class DiagramsModifierWrapper implements IAttachmentModifier {
 
     /**
      * 倍率適用後の値でDiagramsDataを再構築する。
-     * テキストフォーマットはモディファイアIDとtitleKeyに基づいて決定。
+     * テキストフォーマットはモディファイアIDに基づいて決定。
      */
     private DiagramsData rebuildDiagramsData(DiagramsData d, double newModPct,
                                               double newDelta, double newTotal) {
-        String titleKey = d.titleKey();
         String posText, negText, defText;
         Number newModifier;
 
         switch (modifierId) {
-            case "damage" -> {
-                posText = String.format("%.2f \u00a7a(+%.2f)", newTotal, newDelta);
-                negText = String.format("%.2f \u00a7c(%.2f)", newTotal, newDelta);
-                defText = String.format("%.2f", newTotal);
-                newModifier = asOriginalType(d.modifier(), newDelta);
-            }
-            case "recoil" -> {
-                // 反動: 増加=悪い(赤), 減少=良い(緑)
-                posText = String.format("%.2f \u00a7c(+%.2f)", newTotal, newDelta);
-                negText = String.format("%.2f \u00a7a(%.2f)", newTotal, newDelta);
-                defText = String.format("%.2f", newTotal);
-                newModifier = asOriginalType(d.modifier(), newDelta);
-            }
-            case "inaccuracy" -> {
-                // hipfire/sneak/lie inaccuracy: 増加=悪い(赤), 減少=良い(緑)
+            case "recoil", "inaccuracy" -> {
+                // 増加=悪い(赤§c), 減少=良い(緑§a)
                 posText = String.format("%.2f \u00a7c(+%.2f)", newTotal, newDelta);
                 negText = String.format("%.2f \u00a7a(%.2f)", newTotal, newDelta);
                 defText = String.format("%.2f", newTotal);
@@ -342,7 +324,7 @@ public class DiagramsModifierWrapper implements IAttachmentModifier {
                 newModifier = deltaInt;
             }
             case "ads" -> {
-                // ADS時間: 増加=悪い(赤), 減少=良い(緑)
+                // ADS時間: 増加=悪い(赤§c), 減少=良い(緑§a)
                 posText = String.format("%.2fs \u00a7c(+%.2f)", newTotal, newDelta);
                 negText = String.format("%.2fs \u00a7a(%.2f)", newTotal, newDelta);
                 defText = String.format("%.2fs", newTotal);
@@ -354,12 +336,6 @@ public class DiagramsModifierWrapper implements IAttachmentModifier {
                 defText = String.format("x%.1f", newTotal);
                 newModifier = asOriginalType(d.modifier(), newDelta);
             }
-            case "knockback" -> {
-                posText = String.format("%.2f \u00a7a(+%.2f)", newTotal, newDelta);
-                negText = String.format("%.2f \u00a7c(%.2f)", newTotal, newDelta);
-                defText = String.format("%.2f", newTotal);
-                newModifier = asOriginalType(d.modifier(), newDelta);
-            }
             case "pierce" -> {
                 int totalInt = (int) Math.round(newTotal);
                 int deltaInt = (int) Math.round(newDelta);
@@ -368,14 +344,8 @@ public class DiagramsModifierWrapper implements IAttachmentModifier {
                 defText = String.format("%d", totalInt);
                 newModifier = deltaInt;
             }
-            case "movement_speed" -> {
-                // 移動速度: 増加=良い(緑), 減少=悪い(赤) — フォーマットは汎用
-                posText = String.format("%.2f \u00a7a(+%.2f)", newTotal, newDelta);
-                negText = String.format("%.2f \u00a7c(%.2f)", newTotal, newDelta);
-                defText = String.format("%.2f", newTotal);
-                newModifier = asOriginalType(d.modifier(), newDelta);
-            }
             default -> {
+                // damage, knockback, movement_speed, その他: 標準フォーマット
                 posText = String.format("%.2f \u00a7a(+%.2f)", newTotal, newDelta);
                 negText = String.format("%.2f \u00a7c(%.2f)", newTotal, newDelta);
                 defText = String.format("%.2f", newTotal);
@@ -385,7 +355,7 @@ public class DiagramsModifierWrapper implements IAttachmentModifier {
 
         return new DiagramsData(
                 d.defaultPercent(), newModPct, newModifier,
-                titleKey, posText, negText, defText,
+                d.titleKey(), posText, negText, defText,
                 d.positivelyBetter()
         );
     }
@@ -438,49 +408,5 @@ public class DiagramsModifierWrapper implements IAttachmentModifier {
 
     private static double clamp01(double v) {
         return Math.max(0.0, Math.min(1.0, v));
-    }
-
-    private static double getAttr(LocalPlayer player, RegistryObject<Attribute> attr) {
-        return FireModeHelper.getAttributeValue(player, attr);
-    }
-
-    private static double getTypeAttr(LocalPlayer player, @Nullable GunType gunType,
-                                       Function<GunType, RegistryObject<Attribute>> getter) {
-        if (gunType == null) return 1.0;
-        return FireModeHelper.getAttributeValue(player, getter.apply(gunType));
-    }
-
-    /** 確率/加算系属性の値を取得（デフォルト0.0） */
-    private static double getChanceAttr(LocalPlayer player, RegistryObject<Attribute> attr) {
-        Attribute a = attr.get();
-        if (player.getAttributes().hasAttribute(a)) {
-            return player.getAttributeValue(a);
-        }
-        return 0.0;
-    }
-
-    /** 銃種別の確率/加算系属性（デフォルト0.0） */
-    private static double getTypeChanceAttr(LocalPlayer player, @Nullable GunType gunType,
-                                             Function<GunType, RegistryObject<Attribute>> getter) {
-        if (gunType == null) return 0.0;
-        Attribute a = getter.apply(gunType).get();
-        if (player.getAttributes().hasAttribute(a)) {
-            return player.getAttributeValue(a);
-        }
-        return 0.0;
-    }
-
-    private double getFireModeDamageMult(LocalPlayer player,
-                                          @Nullable FireMode mode, @Nullable GunType gunType) {
-        if (mode == null) return 1.0;
-        return FireModeHelper.getAttributeValue(player, FireModeHelper.getGlobalDamageAttribute(mode))
-                * FireModeHelper.getAttributeValue(player, FireModeHelper.getTypeDamageAttribute(gunType, mode));
-    }
-
-    private double getFireModeAccuracyMult(LocalPlayer player,
-                                            @Nullable FireMode mode, @Nullable GunType gunType) {
-        if (mode == null) return 1.0;
-        return FireModeHelper.getAttributeValue(player, FireModeHelper.getGlobalAccuracyAttribute(mode))
-                * FireModeHelper.getAttributeValue(player, FireModeHelper.getTypeAccuracyAttribute(gunType, mode));
     }
 }

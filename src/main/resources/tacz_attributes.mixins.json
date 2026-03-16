@@ -14,8 +14,7 @@
     "ShootIntervalMixin",
     "LivingEntityAimMixin",
     "BulletAmountMixin",
-    "LivingEntityDrawGunMixin",
-    "TargetBlockMixin"
+    "LivingEntityDrawGunMixin"
   ],
   "client": [
     "ObjectAnimationRunnerMixin",

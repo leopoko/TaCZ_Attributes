@@ -10,9 +10,11 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
 import javax.annotation.Nullable;
+import java.util.function.Function;
 
 /**
  * FireMode（射撃モード）に基づく属性値の解決ユーティリティ。
+ * 銃種別・確率系属性の取得ヘルパーも提供する。
  */
 public final class FireModeHelper {
 
@@ -95,5 +97,57 @@ public final class FireModeHelper {
             return entity.getAttributeValue(attribute);
         }
         return 1.0;
+    }
+
+    /**
+     * 銃種別属性の値を取得する。gunType==nullなら1.0を返す。
+     */
+    public static double getTypeAttributeValue(LivingEntity entity, @Nullable GunType gunType,
+                                                Function<GunType, DeferredHolder<Attribute, Attribute>> getter) {
+        if (gunType == null) return 1.0;
+        return getAttributeValue(entity, getter.apply(gunType));
+    }
+
+    /**
+     * 確率/加算系属性の値を取得する（デフォルト0.0）。
+     */
+    public static double getChanceAttributeValue(LivingEntity entity, DeferredHolder<Attribute, Attribute> attribute) {
+        if (entity.getAttributes().hasAttribute(attribute)) {
+            return entity.getAttributeValue(attribute);
+        }
+        return 0.0;
+    }
+
+    /**
+     * 銃種別の確率/加算系属性の値を取得する（デフォルト0.0）。gunType==nullなら0.0を返す。
+     */
+    public static double getTypeChanceAttributeValue(LivingEntity entity, @Nullable GunType gunType,
+                                                      Function<GunType, DeferredHolder<Attribute, Attribute>> getter) {
+        if (gunType == null) return 0.0;
+        DeferredHolder<Attribute, Attribute> attr = getter.apply(gunType);
+        if (entity.getAttributes().hasAttribute(attr)) {
+            return entity.getAttributeValue(attr);
+        }
+        return 0.0;
+    }
+
+    /**
+     * FireModeに基づくダメージ倍率（全体×銃種別）を取得する。
+     */
+    public static double getFireModeDamageMultiplier(LivingEntity entity, @Nullable FireMode mode,
+                                                      @Nullable GunType gunType) {
+        if (mode == null) return 1.0;
+        return getAttributeValue(entity, getGlobalDamageAttribute(mode))
+                * getAttributeValue(entity, getTypeDamageAttribute(gunType, mode));
+    }
+
+    /**
+     * FireModeに基づく精度倍率（全体×銃種別）を取得する。
+     */
+    public static double getFireModeAccuracyMultiplier(LivingEntity entity, @Nullable FireMode mode,
+                                                        @Nullable GunType gunType) {
+        if (mode == null) return 1.0;
+        return getAttributeValue(entity, getGlobalAccuracyAttribute(mode))
+                * getAttributeValue(entity, getTypeAccuracyAttribute(gunType, mode));
     }
 }

@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.2+1.21.1] - 2026-03-16
+
+### 追加
+- 標的ブロック（tacz:target）にダメージ属性倍率を反映（TargetBlockMixin）
+- ITargetEntity（TargetMinecart等）にダメージ属性倍率を反映（EntityKineticBulletMixin）
+- ダメージ倍率計算の共通ユーティリティ（DamageModifierHelper）
+- GunRefitScreen（Zキー）にプレイヤー属性効果をステータスバーとして表示
+  - TaCZの既存モディファイアバー（ダメージ、反動、精度、RPM、ADS、HS倍率、ノックバック、貫通、移動速度）にプレイヤー属性の効果を反映（DiagramsModifierWrapper）
+  - アタッチメントがない場合のフォールバック表示（AttributePropertyModifier）
+  - TaCZモディファイアでカバーされないカテゴリ（リロード速度、コッキング速度、マガジン容量、武器切替速度、弾数、バースト速度、弾薬非消費、弾薬回復、装填節約、追加弾薬）を独自バーで表示
+
+### 改善
+- 属性取得ヘルパーメソッドをFireModeHelperに統合し、コード重複を削減
+
 ## [1.1+1.21.1] - 2026-03-12
 
 ### 追加

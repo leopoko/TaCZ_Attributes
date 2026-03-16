@@ -2,6 +2,7 @@ package com.github.leopoko.tacz_attributes.mixin;
 
 import com.github.leopoko.tacz_attributes.attribute.CustomAttributes;
 import com.github.leopoko.tacz_attributes.attribute.GunType;
+import com.github.leopoko.tacz_attributes.util.DamageModifierHelper;
 import com.github.leopoko.tacz_attributes.util.GunTypeResolver;
 import com.tacz.guns.entity.EntityKineticBullet;
 import net.minecraft.resources.ResourceLocation;
@@ -25,6 +26,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * <p>
  * - ノックバック倍率: onHitEntity() 内の KnockBackModifier.setKnockBackStrength() の引数を変更
  * - 貫通数倍率: コンストラクタ末尾で pierce フィールドを変更
+ * - ITargetEntityダメージ: onHitEntity() 内の ITargetEntity.onProjectileHit() のダメージ引数に属性倍率を適用
  */
 @Mixin(EntityKineticBullet.class)
 public abstract class EntityKineticBulletMixin extends Projectile {
@@ -105,6 +107,26 @@ public abstract class EntityKineticBulletMixin extends Projectile {
         int oldPierce = this.pierce;
         this.pierce = Math.max(1, (int) (this.pierce * combined));
 
+    }
+
+    /**
+     * onHitEntity() 内の ITargetEntity.onProjectileHit() のダメージ引数に
+     * GunDamageModifier と同等の属性倍率を適用する。
+     */
+    @ModifyArg(
+            method = "onHitEntity",
+            at = @At(value = "INVOKE", target = "Lcom/tacz/guns/api/entity/ITargetEntity;onProjectileHit(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/EntityHitResult;Lnet/minecraft/world/damagesource/DamageSource;F)V"),
+            index = 3,
+            remap = false
+    )
+    private float tacz_attributes$modifyTargetDamage(float damage) {
+        Entity owner = this.getOwner();
+        if (!(owner instanceof LivingEntity shooter)) return damage;
+
+        double combinedModifier = DamageModifierHelper.calculateDamageModifier(shooter, this.gunId);
+        if (combinedModifier == 1.0) return damage;
+
+        return (float) (damage * combinedModifier);
     }
 
     @Unique

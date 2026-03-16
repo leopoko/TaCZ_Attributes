@@ -66,7 +66,10 @@ public enum GunType {
     private RegistryObject<Attribute> autoBulletAmountAttribute;
     private RegistryObject<Attribute> burstBulletAmountAttribute;
     private RegistryObject<Attribute> drawSpeedAttribute;
+    private RegistryObject<Attribute> holsterSpeedAttribute;
     private RegistryObject<Attribute> burstSpeedAttribute;
+    private RegistryObject<Attribute> bulletVelocityAttribute;
+    private RegistryObject<Attribute> bulletLifeAttribute;
 
     private static final Map<String, GunType> BY_TYPE_ID = new HashMap<>();
 
@@ -252,8 +255,20 @@ public enum GunType {
         return drawSpeedAttribute;
     }
 
+    public RegistryObject<Attribute> getHolsterSpeedAttribute() {
+        return holsterSpeedAttribute;
+    }
+
     public RegistryObject<Attribute> getBurstSpeedAttribute() {
         return burstSpeedAttribute;
+    }
+
+    public RegistryObject<Attribute> getBulletVelocityAttribute() {
+        return bulletVelocityAttribute;
+    }
+
+    public RegistryObject<Attribute> getBulletLifeAttribute() {
+        return bulletLifeAttribute;
     }
 
     /**
@@ -315,7 +330,10 @@ public enum GunType {
             type.autoBulletAmountAttribute = registerBulletAmount(registry, id + "_auto_bullet_amount");
             type.burstBulletAmountAttribute = registerBulletAmount(registry, id + "_burst_bullet_amount");
             type.drawSpeedAttribute = registerSpeedMultiplier(registry, id + "_draw_speed");
+            type.holsterSpeedAttribute = registerSpeedMultiplier(registry, id + "_holster_speed");
             type.burstSpeedAttribute = registerSpeedMultiplier(registry, id + "_burst_speed");
+            type.bulletVelocityAttribute = registerSpeedMultiplier(registry, id + "_bullet_velocity");
+            type.bulletLifeAttribute = registerSpeedMultiplier(registry, id + "_bullet_life");
         }
     }
 

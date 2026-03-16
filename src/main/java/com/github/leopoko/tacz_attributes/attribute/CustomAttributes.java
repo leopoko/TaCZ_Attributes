@@ -183,13 +183,25 @@ public class CustomAttributes {
     public static final RegistryObject<Attribute> BURST_BULLET_AMOUNT = ATTRIBUTES.register("burst_bullet_amount",
             () -> new RangedAttribute("attribute.tacz_attributes.burst_bullet_amount", 1.0, 0.01, 100.0).setSyncable(true));
 
-    // 武器切替速度倍率（1.0 = 変更なし、2.0 = 取り出し/しまい2倍速）
+    // 武器取り出し速度倍率（1.0 = 変更なし、2.0 = 取り出し2倍速）
     public static final RegistryObject<Attribute> DRAW_SPEED = ATTRIBUTES.register("draw_speed",
             () -> new RangedAttribute("attribute.tacz_attributes.draw_speed", 1.0, 0.01, 10.0).setSyncable(true));
+
+    // 武器しまい速度倍率（1.0 = 変更なし、2.0 = しまい2倍速）
+    public static final RegistryObject<Attribute> HOLSTER_SPEED = ATTRIBUTES.register("holster_speed",
+            () -> new RangedAttribute("attribute.tacz_attributes.holster_speed", 1.0, 0.01, 10.0).setSyncable(true));
 
     // バースト速度倍率（1.0 = 変更なし、2.0 = バースト間隔半分）
     public static final RegistryObject<Attribute> BURST_SPEED = ATTRIBUTES.register("burst_speed",
             () -> new RangedAttribute("attribute.tacz_attributes.burst_speed", 1.0, 0.01, 10.0).setSyncable(true));
+
+    // 弾速倍率（1.0 = 変更なし、2.0 = 弾速2倍）
+    public static final RegistryObject<Attribute> BULLET_VELOCITY = ATTRIBUTES.register("bullet_velocity",
+            () -> new RangedAttribute("attribute.tacz_attributes.bullet_velocity", 1.0, 0.01, 10.0).setSyncable(true));
+
+    // 射程倍率（1.0 = 変更なし、2.0 = 弾丸寿命2倍 = 射程2倍）
+    public static final RegistryObject<Attribute> BULLET_LIFE = ATTRIBUTES.register("bullet_life",
+            () -> new RangedAttribute("attribute.tacz_attributes.bullet_life", 1.0, 0.01, 10.0).setSyncable(true));
 
     // 銃種別属性の一括登録
     static {

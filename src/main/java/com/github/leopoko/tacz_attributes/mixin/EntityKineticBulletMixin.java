@@ -12,6 +12,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -26,12 +27,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * - ITargetEntityダメージ: onHitEntity() 内の ITargetEntity.onProjectileHit() のダメージ引数に属性倍率を適用
  * - ノックバック倍率: onHitEntity() 内の KnockBackModifier.setKnockBackStrength() の引数を変更
  * - 貫通数倍率: コンストラクタ末尾で pierce フィールドを変更
+ * - 弾速倍率: shoot() 末尾で deltaMovement をスケーリング
+ * - 射程倍率: コンストラクタ末尾で life フィールドを変更
  */
 @Mixin(EntityKineticBullet.class)
 public abstract class EntityKineticBulletMixin extends Projectile {
 
     @Shadow(remap = false)
     private int pierce;
+
+    @Shadow(remap = false)
+    private int life;
 
     @Shadow(remap = false)
     private ResourceLocation gunId;
@@ -130,6 +136,38 @@ public abstract class EntityKineticBulletMixin extends Projectile {
         int oldPierce = this.pierce;
         this.pierce = Math.max(1, (int) (this.pierce * combined));
 
+        // 射程（弾丸寿命）倍率
+        double globalLife = tacz_attributes$getAttributeValue(shooter, CustomAttributes.BULLET_LIFE.get());
+        double typeLife = 1.0;
+        if (gunType != null) {
+            typeLife = tacz_attributes$getAttributeValue(shooter, gunType.getBulletLifeAttribute().get());
+        }
+        double combinedLife = globalLife * typeLife;
+        if (combinedLife != 1.0) {
+            this.life = Math.max(1, (int) (this.life * combinedLife));
+        }
+    }
+
+    /**
+     * shoot() 末尾で deltaMovement を弾速属性でスケーリングする。
+     * shoot() は Projectile から継承され、deltaMovement に速度ベクトルが設定された後に呼ばれる。
+     */
+    @Inject(method = "shoot", at = @At("TAIL"))
+    private void tacz_attributes$modifyBulletVelocity(double pX, double pY, double pZ, float pVelocity, float pInaccuracy, CallbackInfo ci) {
+        Entity owner = this.getOwner();
+        if (!(owner instanceof LivingEntity shooter)) return;
+
+        GunType gunType = GunTypeResolver.resolve(this.gunId);
+        double globalVelocity = tacz_attributes$getAttributeValue(shooter, CustomAttributes.BULLET_VELOCITY.get());
+        double typeVelocity = 1.0;
+        if (gunType != null) {
+            typeVelocity = tacz_attributes$getAttributeValue(shooter, gunType.getBulletVelocityAttribute().get());
+        }
+        double combinedVelocity = globalVelocity * typeVelocity;
+        if (combinedVelocity == 1.0) return;
+
+        Vec3 motion = this.getDeltaMovement();
+        this.setDeltaMovement(motion.scale(combinedVelocity));
     }
 
     @Unique

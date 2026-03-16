@@ -177,10 +177,15 @@ public class AttributePropertyModifier implements IAttachmentModifier<Object, Ob
                 * FireModeHelper.getTypeAttributeValue(player, gunType, GunType::getMagazineCapacityAttribute);
         addMultiplierEntry(result, "gui.tacz_attributes.diagram.magazine", magCap, true);
 
-        // 武器切替速度
+        // 武器取り出し速度
         double drawSpeed = FireModeHelper.getAttributeValue(player, CustomAttributes.DRAW_SPEED)
                 * FireModeHelper.getTypeAttributeValue(player, gunType, GunType::getDrawSpeedAttribute);
         addMultiplierEntry(result, "gui.tacz_attributes.diagram.draw_speed", drawSpeed, true);
+
+        // 武器しまい速度
+        double holsterSpeed = FireModeHelper.getAttributeValue(player, CustomAttributes.HOLSTER_SPEED)
+                * FireModeHelper.getTypeAttributeValue(player, gunType, GunType::getHolsterSpeedAttribute);
+        addMultiplierEntry(result, "gui.tacz_attributes.diagram.holster_speed", holsterSpeed, true);
 
         // 弾数（モード別）
         if (fireMode != null) {
@@ -194,6 +199,16 @@ public class AttributePropertyModifier implements IAttachmentModifier<Object, Ob
                     * FireModeHelper.getTypeAttributeValue(player, gunType, GunType::getBurstSpeedAttribute);
             addMultiplierEntry(result, "gui.tacz_attributes.diagram.burst_speed", burstSpeed, true);
         }
+
+        // 弾速
+        double bulletVelocity = FireModeHelper.getAttributeValue(player, CustomAttributes.BULLET_VELOCITY)
+                * FireModeHelper.getTypeAttributeValue(player, gunType, GunType::getBulletVelocityAttribute);
+        addMultiplierEntry(result, "gui.tacz_attributes.diagram.bullet_velocity", bulletVelocity, true);
+
+        // 射程
+        double bulletLife = FireModeHelper.getAttributeValue(player, CustomAttributes.BULLET_LIFE)
+                * FireModeHelper.getTypeAttributeValue(player, gunType, GunType::getBulletLifeAttribute);
+        addMultiplierEntry(result, "gui.tacz_attributes.diagram.bullet_life", bulletLife, true);
 
         // === 確率系属性 ===
 

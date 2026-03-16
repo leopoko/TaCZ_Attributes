@@ -54,7 +54,10 @@ public class EntityAttributeSetup {
             event.add(EntityType.PLAYER, CustomAttributes.AUTO_BULLET_AMOUNT.get());
             event.add(EntityType.PLAYER, CustomAttributes.BURST_BULLET_AMOUNT.get());
             event.add(EntityType.PLAYER, CustomAttributes.DRAW_SPEED.get());
+            event.add(EntityType.PLAYER, CustomAttributes.HOLSTER_SPEED.get());
             event.add(EntityType.PLAYER, CustomAttributes.BURST_SPEED.get());
+            event.add(EntityType.PLAYER, CustomAttributes.BULLET_VELOCITY.get());
+            event.add(EntityType.PLAYER, CustomAttributes.BULLET_LIFE.get());
 
             // 銃種別属性
             for (GunType gunType : GunType.values()) {
@@ -100,7 +103,10 @@ public class EntityAttributeSetup {
                 event.add(EntityType.PLAYER, gunType.getAutoBulletAmountAttribute().get());
                 event.add(EntityType.PLAYER, gunType.getBurstBulletAmountAttribute().get());
                 event.add(EntityType.PLAYER, gunType.getDrawSpeedAttribute().get());
+                event.add(EntityType.PLAYER, gunType.getHolsterSpeedAttribute().get());
                 event.add(EntityType.PLAYER, gunType.getBurstSpeedAttribute().get());
+                event.add(EntityType.PLAYER, gunType.getBulletVelocityAttribute().get());
+                event.add(EntityType.PLAYER, gunType.getBulletLifeAttribute().get());
             }
         }
     }

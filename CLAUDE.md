@@ -125,8 +125,11 @@ src/main/java/com/github/leopoko/tacz_attributes/
 | SEMI_BULLET_AMOUNT | `semi_bullet_amount` | 1.0 | 0.01〜100.0 | セミオート弾数倍率 |
 | AUTO_BULLET_AMOUNT | `auto_bullet_amount` | 1.0 | 0.01〜100.0 | フルオート弾数倍率 |
 | BURST_BULLET_AMOUNT | `burst_bullet_amount` | 1.0 | 0.01〜100.0 | バースト弾数倍率 |
-| DRAW_SPEED | `draw_speed` | 1.0 | 0.01〜10.0 | 武器切替速度倍率（取り出し・しまい両方） |
+| DRAW_SPEED | `draw_speed` | 1.0 | 0.01〜10.0 | 武器取り出し速度倍率 |
+| HOLSTER_SPEED | `holster_speed` | 1.0 | 0.01〜10.0 | 武器しまい速度倍率 |
 | BURST_SPEED | `burst_speed` | 1.0 | 0.01〜10.0 | バースト内射撃間隔速度倍率（高い値=速いバースト） |
+| BULLET_VELOCITY | `bullet_velocity` | 1.0 | 0.01〜10.0 | 弾速倍率 |
+| BULLET_LIFE | `bullet_life` | 1.0 | 0.01〜10.0 | 弾丸寿命（射程）倍率 |
 
 ### 銃種別
 
@@ -178,8 +181,11 @@ src/main/java/com/github/leopoko/tacz_attributes/
 | セミオート弾数 | `_semi_bullet_amount` | 0.01〜100.0 |
 | フルオート弾数 | `_auto_bullet_amount` | 0.01〜100.0 |
 | バースト弾数 | `_burst_bullet_amount` | 0.01〜100.0 |
-| 武器切替速度 | `_draw_speed` | 0.01〜10.0 |
+| 武器取り出し速度 | `_draw_speed` | 0.01〜10.0 |
+| 武器しまい速度 | `_holster_speed` | 0.01〜10.0 |
 | バースト速度 | `_burst_speed` | 0.01〜10.0 |
+| 弾速 | `_bullet_velocity` | 0.01〜10.0 |
+| 弾丸寿命（射程） | `_bullet_life` | 0.01〜10.0 |
 
 例: `pistol_auto_damage`, `sniper_semi_accuracy`, `rifle_vertical_recoil`, `smg_rpm_multiplier` 等。
 銃種別属性のデフォルト値は倍率系がすべて 1.0（変更なし）、確率・数量系が 0.0（発動なし）。
@@ -289,14 +295,31 @@ src/main/java/com/github/leopoko/tacz_attributes/
 
 ### 武器切替速度の計算式
 
-`最終holster時間 = TaCZ元putAwayTime / (draw_speed × 銃種別draw_speed)`
+`最終holster時間 = TaCZ元putAwayTime / (holster_speed × 銃種別holster_speed)`
 `最終draw時間 = TaCZ元drawTime / (draw_speed × 銃種別draw_speed)`
 
-- draw_speed 2.0 → 取り出し・しまい時間が半分 → 2倍速で武器切替
-- draw_speed 0.5 → 取り出し・しまい時間が2倍 → 半分の速度
+- draw_speed 2.0 → 取り出し時間が半分 → 2倍速で取り出し
+- holster_speed 2.0 → しまい時間が半分 → 2倍速でしまい
 - 銃種は切り替え先の武器（メインハンド）で判定
-- サーバー側: LivingEntityDrawGun.draw() の TAIL で drawTimestamp をスケーリング + getDrawCoolDown() の RETURN でdraw時間デルタを減算
-- クライアント側: GunItemRendererWrapper.getPutAwayTime() の戻り値をスケーリング（アニメーション・音声タイミングに反映）
+- サーバー側: LivingEntityDrawGun.draw() の TAIL で drawTimestamp（holster時間）をholster_speedでスケーリング + getDrawCoolDown() の RETURN でdraw時間デルタをdraw_speedで減算
+- クライアント側: GunItemRendererWrapper.getPutAwayTime() の戻り値をholster_speedでスケーリング（アニメーション・音声タイミングに反映）
+- クライアント側: DrawAnimationSpeedHandler でdrawアニメーションの速度をdraw_speedでスケーリング
+
+### 弾速の計算式
+
+`最終弾速 = TaCZ元速度 × bullet_velocity × 銃種別bullet_velocity`
+
+- bullet_velocity 2.0 → 弾速2倍
+- bullet_velocity 0.5 → 弾速半分
+- EntityKineticBullet.shoot() の TAIL で deltaMovement をスケーリング
+
+### 射程（弾丸寿命）の計算式
+
+`最終寿命 = max(1, TaCZ元life × bullet_life × 銃種別bullet_life)`
+
+- bullet_life 2.0 → 弾丸寿命2倍 → 射程2倍
+- bullet_life 0.5 → 弾丸寿命半分 → 射程半分
+- EntityKineticBullet コンストラクタ末尾で life フィールドをスケーリング
 
 ## MOD ID
 

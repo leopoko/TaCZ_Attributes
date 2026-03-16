@@ -26,11 +26,11 @@ import java.util.function.Supplier;
  * 武器の取り出し・しまい速度属性に基づいて、draw/holsterクールダウンを変更する。
  * <p>
  * 実装方針:
- * 1. draw() の TAIL で drawTimestamp の未来オフセット（holster時間）をスケーリング
- * 2. getDrawCoolDown() の RETURN で draw時間分のデルタを減算
+ * 1. draw() の TAIL で drawTimestamp の未来オフセット（holster時間）をholster_speedでスケーリング
+ * 2. getDrawCoolDown() の RETURN で draw時間分のデルタをdraw_speedで減算
  * <p>
  * 計算式:
- * - holster時間 = 元holster時間 / (全体draw_speed × 銃種別draw_speed)
+ * - holster時間 = 元holster時間 / (全体holster_speed × 銃種別holster_speed)
  * - draw時間 = 元draw時間 / (全体draw_speed × 銃種別draw_speed)
  */
 @Mixin(LivingEntityDrawGun.class)
@@ -45,13 +45,13 @@ public class LivingEntityDrawGunMixin {
     /**
      * draw() の末尾で drawTimestamp の未来オフセットをスケーリングする。
      * drawTimestamp = now + holsterTimeMs に設定されているため、
-     * 未来オフセット（holster時間）を draw_speed で除算して短縮する。
+     * 未来オフセット（holster時間）を holster_speed で除算して短縮する。
      */
     @Inject(method = "draw", at = @At("TAIL"), remap = false)
     private void tacz_attributes$scaleDrawTimestamp(Supplier<ItemStack> gunItemSupplier, CallbackInfo ci) {
         if (this.shooter == null) return;
 
-        double speed = tacz_attributes$getDrawSpeedModifier();
+        double speed = tacz_attributes$getHolsterSpeedModifier();
         if (speed == 1.0) return;
 
         long now = System.currentTimeMillis();
@@ -103,6 +103,22 @@ public class LivingEntityDrawGunMixin {
         double typeSpeed = 1.0;
         if (gunType != null) {
             typeSpeed = tacz_attributes$getAttributeValue(this.shooter, gunType.getDrawSpeedAttribute().get());
+        }
+
+        return globalSpeed * typeSpeed;
+    }
+
+    @Unique
+    private double tacz_attributes$getHolsterSpeedModifier() {
+        if (this.shooter == null) return 1.0;
+
+        double globalSpeed = tacz_attributes$getAttributeValue(this.shooter, CustomAttributes.HOLSTER_SPEED.get());
+
+        // 銃種は切り替え先の武器（メインハンド）で判定
+        GunType gunType = GunTypeResolver.resolveFromItem(this.shooter.getMainHandItem());
+        double typeSpeed = 1.0;
+        if (gunType != null) {
+            typeSpeed = tacz_attributes$getAttributeValue(this.shooter, gunType.getHolsterSpeedAttribute().get());
         }
 
         return globalSpeed * typeSpeed;

@@ -21,8 +21,7 @@ public abstract class TargetBlockMixin {
 
     @Redirect(
             method = "onProjectileHit",
-            at = @At(value = "INVOKE", target = "Lcom/tacz/guns/entity/EntityKineticBullet;getDamage(Lnet/minecraft/world/phys/Vec3;)F"),
-            remap = false
+            at = @At(value = "INVOKE", target = "Lcom/tacz/guns/entity/EntityKineticBullet;getDamage(Lnet/minecraft/world/phys/Vec3;)F", remap = false)
     )
     private float tacz_attributes$modifyTargetBlockDamage(EntityKineticBullet bullet, Vec3 hitPos) {
         float damage = bullet.getDamage(hitPos);

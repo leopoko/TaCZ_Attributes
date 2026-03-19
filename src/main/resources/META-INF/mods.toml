@@ -62,3 +62,10 @@ mandatory = true
 versionRange = "${minecraft_version_range}"
 ordering = "NONE"
 side = "BOTH"
+# TaCZ - 銃MOD本体。全Mixinがこのクラスをターゲットするため必須
+[[dependencies."${mod_id}"]]
+modId = "tacz"
+mandatory = true
+versionRange = "[1.0.3,)"
+ordering = "AFTER"
+side = "BOTH"

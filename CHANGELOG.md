@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3] - 2026-03-19
+
+### 修正
+- 本番環境でのMixinTransformerErrorクラッシュを修正（TargetBlockMixin）
+  - `onProjectileHit`はバニラメソッドのオーバーライドであるため、SRG名へのリマッピングが必要だが、`remap = false`が誤ってアノテーション全体に設定されていた
+  - `remap = false`を`@Redirect`から`@At`に移動し、バニラメソッド名のリマッピングを有効化
+- ApothicAttributesを任意依存に変更（mods.tomlからmandatory依存を削除）
+
 ## [1.2] - 2026-03-13
 
 ### 追加

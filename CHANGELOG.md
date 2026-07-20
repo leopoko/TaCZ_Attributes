@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.4] - 2026-07-20
+
+### 修正
+- TaCZ 1.1.8 でリロード/コッキング/武器切替のアニメーション速度が反映されなくなる問題を修正
+  - TaCZ 1.1.8 の `default_state_machine.lua` に `PRE_PARALLEL_TRACK_1〜5` が追加され、MAIN_TRACK のトラック番号が 4 → 9 にずれた
+  - `DrawAnimationSpeedHandler` / `ReloadAnimationSpeedHandler` がトラック番号 4 を直接指定していたため、速度倍率が未使用トラックに適用され無効化されていた
+  - サーバー側の所要時間だけが短縮され、アニメーションが実時間と一致しない状態になっていた
+- トラックの特定方法をトラック番号から再生中のアニメーション名（`reload*` / `bolt*` / `draw*`）に変更（AnimationSpeedApplier）
+  - `minigun` のように独自トラック構成を持つ銃（MAIN_TRACK = 4 のまま）や、サードパーティ銃MODの独自ステートマシンにも追従する
+
+### 変更
+- TaCZ 依存を 1.1.7-hotfix (7401617) から 1.1.8-hotfix (8141310) に更新
+
+### 改善
+- 2つのアニメーション速度ハンドラで重複していたトラック走査処理を `AnimationSpeedApplier` に統合
+
 ## [1.3] - 2026-03-19
 
 ### 修正

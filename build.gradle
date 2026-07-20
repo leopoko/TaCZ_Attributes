@@ -264,6 +264,13 @@ publishMods {
         minecraftVersions.add("1.20.1")
         javaVersions.add(JavaVersion.VERSION_17)
         modLoaders.add("forge")
+        // CurseForgeはenvironmentタグ(Client/Server)を必須とする。
+        // 未指定だとアップロードが 400 "You must select at least one version
+        // from the environment group of versions" で失敗する。
+        // 本MODはサーバー側Mixin(ダメージ・弾薬等)とクライアント側Mixin
+        // (反動・アニメーション等)の両方を持つため、双方を必須とする。
+        clientRequired = true
+        serverRequired = true
         requires("timeless-and-classics-zero")
         requires("apothic-attributes")
     }

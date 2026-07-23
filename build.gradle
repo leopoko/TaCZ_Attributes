@@ -68,7 +68,7 @@ repositories {
 
 dependencies {
     // TaCZ 1.21.1 NeoForge Port (CurseMaven)
-    implementation "curse.maven:tacz-1-21-1-1353462:7695875"
+    implementation "curse.maven:tacz-1-21-1-1353462:8387838"
     // ApothicAttributes + Placebo
     implementation "curse.maven:apothic-attributes-898963:7445079"
     implementation "curse.maven:placebo-283644:6926281"

@@ -1,18 +1,10 @@
 package com.github.leopoko.tacz_attributes.client;
 
 import com.github.leopoko.tacz_attributes.Tacz_attributes;
-import com.github.leopoko.tacz_attributes.api.ISpeedModifiable;
 import com.github.leopoko.tacz_attributes.attribute.CustomAttributes;
 import com.github.leopoko.tacz_attributes.attribute.GunType;
 import com.github.leopoko.tacz_attributes.util.GunTypeResolver;
-import com.tacz.guns.api.TimelessAPI;
-import com.tacz.guns.api.client.animation.AnimationController;
-import com.tacz.guns.api.client.animation.DiscreteTrackArray;
-import com.tacz.guns.api.client.animation.ObjectAnimationRunner;
-import com.tacz.guns.api.client.animation.statemachine.AnimationStateMachine;
 import com.tacz.guns.api.entity.IGunOperator;
-import com.tacz.guns.api.item.IGun;
-import com.tacz.guns.client.resource.GunDisplayInstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.Holder;
@@ -23,8 +15,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 
-import java.util.List;
-
 /**
  * クライアント側でdrawアニメーションの速度をdraw_speed属性に追従させるイベントハンドラ。
  * <p>
@@ -34,19 +24,14 @@ import java.util.List;
  * <p>
  * 毎クライアントtickで以下を行う:
  * 1. getSynDrawCoolDown() でdraw/put-away状態を検出
- * 2. draw状態中であればMAIN_TRACKのアニメーションランナーに速度倍率を設定
+ * 2. draw状態中であればdrawアニメーションのランナーに速度倍率を設定
  * 3. draw終了時に速度倍率をリセット
  */
 @EventBusSubscriber(modid = Tacz_attributes.MODID, value = Dist.CLIENT)
 public class DrawAnimationSpeedHandler {
 
-    /**
-     * デフォルトステートマシンでのMAIN_TRACKの位置。
-     * STATIC_TRACK_LINE = 0, MAIN_TRACK = trackIndex 4
-     * (BASE=0, BOLT_CAUGHT=1, SAFETY=2, ADS=3, MAIN=4)
-     */
-    private static final int STATIC_TRACK_LINE = 0;
-    private static final int MAIN_TRACK_INDEX = 4;
+    /** 武器取り出しアニメーション名の接頭辞（draw） */
+    private static final String DRAW_ANIMATION_PREFIX = "draw";
 
     private static boolean wasDrawing = false;
 
@@ -61,12 +46,12 @@ public class DrawAnimationSpeedHandler {
         if (isDrawing) {
             double speed = getDrawSpeedModifier(player);
             if (speed != 1.0) {
-                applySpeedToMainTrack(player, (float) speed);
+                AnimationSpeedApplier.applyToAnimation(player, (float) speed, DRAW_ANIMATION_PREFIX);
             }
             wasDrawing = true;
         } else if (wasDrawing) {
             // draw終了時に速度倍率をリセット
-            applySpeedToMainTrack(player, 1.0f);
+            AnimationSpeedApplier.resetAll(player);
             wasDrawing = false;
         }
     }
@@ -83,53 +68,6 @@ public class DrawAnimationSpeedHandler {
         }
 
         return globalSpeed * typeSpeed;
-    }
-
-    /**
-     * MAIN_TRACKのアニメーションランナーに速度倍率を設定する。
-     * ランナーが遷移中の場合、遷移先のランナーにも設定する。
-     */
-    private static void applySpeedToMainTrack(LocalPlayer player, float speed) {
-        ItemStack mainHand = player.getMainHandItem();
-        IGun iGun = IGun.getIGunOrNull(mainHand);
-        if (iGun == null) return;
-
-        GunDisplayInstance display = TimelessAPI.getGunDisplay(mainHand).orElse(null);
-        if (display == null) return;
-
-        AnimationStateMachine<?> stateMachine = display.getAnimationStateMachine();
-        if (stateMachine == null || !stateMachine.isInitialized()) return;
-
-        AnimationController controller = stateMachine.getAnimationController();
-        if (controller == null) return;
-
-        var context = stateMachine.getContext();
-        if (context == null) return;
-
-        DiscreteTrackArray trackArray = context.getTrackArray();
-        if (trackArray.getTrackLineSize() <= STATIC_TRACK_LINE) return;
-
-        List<Integer> staticTracks = trackArray.getByIndex(STATIC_TRACK_LINE);
-        if (staticTracks.size() <= MAIN_TRACK_INDEX) return;
-
-        int mainTrackPointer = staticTracks.get(MAIN_TRACK_INDEX);
-        ObjectAnimationRunner runner = controller.getAnimation(mainTrackPointer);
-        if (runner == null) return;
-
-        // ランナーに速度倍率を設定
-        setSpeedOnRunner(runner, speed);
-
-        // 遷移先のランナーにも設定
-        ObjectAnimationRunner transitionTo = runner.getTransitionTo();
-        if (transitionTo != null) {
-            setSpeedOnRunner(transitionTo, speed);
-        }
-    }
-
-    private static void setSpeedOnRunner(ObjectAnimationRunner runner, float speed) {
-        if (runner instanceof ISpeedModifiable modifiable) {
-            modifiable.tacz_attributes$setSpeedMultiplier(speed);
-        }
     }
 
     private static double getAttributeValue(LocalPlayer player, Holder<Attribute> attribute) {

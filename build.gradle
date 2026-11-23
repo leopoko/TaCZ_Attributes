@@ -40,6 +40,13 @@ neoForge {
         data {
             data()
         }
+
+        // GameTest を実行して終了する（./gradlew runGameTestServer）
+        gameTestServer {
+            type = "gameTestServer"
+            gameDirectory = file('run/gametest')
+            systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
+        }
     }
 
     mods {
@@ -68,7 +75,7 @@ repositories {
 
 dependencies {
     // TaCZ 1.21.1 NeoForge Port (CurseMaven)
-    implementation "curse.maven:tacz-1-21-1-1353462:8387838"
+    implementation "curse.maven:timeless-and-classics-zero-1028108:9623169"
     // ApothicAttributes + Placebo
     implementation "curse.maven:apothic-attributes-898963:7445079"
     implementation "curse.maven:placebo-283644:6926281"
@@ -109,6 +116,10 @@ tasks.named('jar', Jar).configure {
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
+
+    // GameTest（./gradlew runGameTestServer 用）は配布用 jar に含めない
+    exclude 'com/github/leopoko/tacz_attributes/gametest/**'
+    exclude 'data/tacz_attributes/structure/**'
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -160,7 +171,7 @@ publishMods {
         // (反動・アニメーション等)の両方を持つため、双方を必須とする。
         clientRequired = true
         serverRequired = true
-        requires("tacz-1-21-1")
+        requires("timeless-and-classics-zero")
         requires("apothic-attributes")
     }
 }

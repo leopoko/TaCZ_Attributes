@@ -2,6 +2,7 @@ package com.github.leopoko.tacz_attributes.mixin;
 
 import com.github.leopoko.tacz_attributes.attribute.CustomAttributes;
 import com.github.leopoko.tacz_attributes.attribute.GunType;
+import com.github.leopoko.tacz_attributes.util.TaczTime;
 import com.github.leopoko.tacz_attributes.util.GunTypeResolver;
 import com.github.leopoko.tacz_attributes.util.ReloadFinishingContext;
 import com.github.leopoko.tacz_attributes.util.ShooterContext;
@@ -72,7 +73,7 @@ public abstract class LivingEntityReloadMixin {
 
         tacz_attributes$originalTimestamp = data.reloadTimestamp;
 
-        long now = System.currentTimeMillis();
+        long now = TaczTime.nowMillis();
         long originalElapsed = now - data.reloadTimestamp;
         long scaledElapsed = (long) (originalElapsed * reloadSpeedModifier);
         data.reloadTimestamp = now - scaledElapsed;

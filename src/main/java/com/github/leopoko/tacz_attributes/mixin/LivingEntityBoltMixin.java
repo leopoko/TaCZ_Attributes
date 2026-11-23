@@ -2,6 +2,7 @@ package com.github.leopoko.tacz_attributes.mixin;
 
 import com.github.leopoko.tacz_attributes.attribute.CustomAttributes;
 import com.github.leopoko.tacz_attributes.attribute.GunType;
+import com.github.leopoko.tacz_attributes.util.TaczTime;
 import com.github.leopoko.tacz_attributes.util.GunTypeResolver;
 import com.github.leopoko.tacz_attributes.util.ShooterContext;
 import com.tacz.guns.entity.shooter.LivingEntityBolt;
@@ -58,7 +59,7 @@ public abstract class LivingEntityBoltMixin {
 
         tacz_attributes$originalBoltTimestamp = data.boltTimestamp;
 
-        long now = System.currentTimeMillis();
+        long now = TaczTime.nowMillis();
         long originalElapsed = now - data.boltTimestamp;
         long scaledElapsed = (long) (originalElapsed * boltSpeedModifier);
         data.boltTimestamp = now - scaledElapsed;

@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.3+1.21.1] - 2026-11-23
+
+### 修正
+- TaCZ 1.2.0 でリロード速度・コッキング速度・武器切替速度を変更すると、リロード等が一瞬で終わる／いつまでも終わらなくなる不具合を修正。
+  TaCZ 1.2.0 からタイムスタンプの時刻源が `System.currentTimeMillis()` から `GunTime.nowMillis()` に変わり、
+  タイムスタンプスケーリング側の経過時間計算が桁違いになっていた。
+  `util/TaczTime` を追加し、`GunTime` があればそれを、なければ `currentTimeMillis` を使うよう変更
+  （LivingEntityReloadMixin / LivingEntityBoltMixin / LivingEntityDrawGunMixin）
+
+### 追加
+- リロード/コッキング/武器切替速度の自動テスト（GameTest、`./gradlew runGameTestServer`）を追加。配布用jarには含まない
+
+### 変更
+- 依存するTaCZを有志移植版（tacz-1-21-1, 1.1.8-hotfix-r3, 8387838）から
+  公式の NeoForge 1.21.1 版 1.2.0-hotfix（timeless-and-classics-zero, 9623169）に変更。移植版は 2026-11 にアーカイブ済み
+
 ## [1.2+1.21.1] - 2026-07-20
 
 ### 修正

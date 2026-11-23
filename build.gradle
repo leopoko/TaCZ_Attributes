@@ -109,6 +109,8 @@ minecraft {
         // By default, the server will crash when no gametests are provided.
         // The gametest system is also enabled by default for other run configs under the /test command.
         gameTestServer {
+            // テスト用ワールドを開発用ワールドと分ける
+            workingDirectory project.file('run-gametest')
             property 'forge.enabledGameTestNamespaces', mod_id
         }
 
@@ -161,7 +163,7 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     // TaCZ (CurseMaven経由)
-    implementation fg.deobf("curse.maven:timeless-and-classics-zero-1028108:8141310")
+    implementation fg.deobf("curse.maven:timeless-and-classics-zero-1028108:9623132")
     // ApothicAttributes と前提ライブラリ
     implementation fg.deobf("dev.shadowsoffire:Placebo:1.20.1-8.6.2")
     implementation fg.deobf("dev.shadowsoffire:ApothicAttributes:1.20.1-1.3.7")
@@ -205,6 +207,10 @@ tasks.named('jar', Jar).configure {
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
+
+    // GameTest（./gradlew runGameTestServer 用）は配布用 jar に含めない
+    exclude 'com/github/leopoko/tacz_attributes/gametest/**'
+    exclude 'data/tacz_attributes/structures/**'
 
     // This is the preferred method to reobfuscate your jar file
     finalizedBy 'reobfJar'

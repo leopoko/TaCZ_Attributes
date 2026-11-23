@@ -75,6 +75,7 @@ src/main/java/com/github/leopoko/tacz_attributes/
     ├── FireModeHelper.java       # FireMode別属性の解決ユーティリティ
     ├── GunTypeResolver.java      # gunId/ItemStack → GunType 解決ユーティリティ
     ├── ReloadFinishingContext.java # リロード処理中フラグ管理 (ThreadLocal)
+    ├── TaczTime.java              # TaCZ のタイムスタンプと同じ時刻源 (1.2.0+: GunTime / 旧: currentTimeMillis)
     └── ShooterContext.java       # ThreadLocalによるプレイヤーコンテキスト管理
 ```
 
@@ -330,6 +331,17 @@ src/main/java/com/github/leopoko/tacz_attributes/
 - 開発環境でのみデバッグログを出力する（`FMLEnvironment.production` で判定）
 - ソースのエンコーディングは UTF-8
 - `build/libs/` にJARが残っていると `runClient` 等でモジュール競合（`ResolutionException`）が発生する。`build.gradle` に自動クリーンフックが設定済み
+
+## 自動テスト（GameTest）
+
+`./gradlew runGameTestServer` でGameTestサーバーを起動し、全テストを実行して終了する（失敗があればビルド失敗）。
+
+- テスト: `src/main/java/com/github/leopoko/tacz_attributes/gametest/`（テンプレート `data/tacz_attributes/structures/empty.nbt`）
+- いずれも `jar` タスクで除外しており、配布用jarには含まれない
+- `TimestampScalingGameTests`: リロード/コッキング/武器切替の速度属性を検証する。実時間は待たず、
+  タイムスタンプを「N ms前に開始した」状態にしてTaCZのtick処理を1回呼び、完了したか・途中かを確認する
+- サーバー側ロジックのみ。クライアント側（アニメーション速度・反動など）はGameTestでは検証できない
+- 修正後は必ず実行すること
 
 ## 修正報告のルール
 

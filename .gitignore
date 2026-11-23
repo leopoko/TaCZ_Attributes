@@ -120,3 +120,4 @@ runs/
 
 # MOD依存JARファイルを追跡する
 !libs/*.jar
+run-gametest/
